@@ -1,0 +1,62 @@
+#!/bin/bash
+
+CONTAINER_ID=""
+CUID="99"
+CGID="100"
+
+parse_flags() {
+    [[ $# -eq 0 ]] && print_usage && exit 1
+
+    while getopts "c:u:g:h" arg; do
+      case ${arg} in
+        c)
+            CONTAINER_ID="$OPTARG"
+        ;;
+        u)
+            CUID="$OPTARG"
+        ;;
+        g)
+            CGID="$OPTARG"
+        ;;
+        h)
+            print_usage
+            exit 0
+        ;;
+        *)
+            print_usage
+            exit 1
+        ;;
+      esac
+    done
+
+    # Check parameters
+    [[ "$CONTAINER_ID" ]] || {
+        echo "-c is required" >&2
+        exit 1
+    }
+}
+
+print_usage() {
+    echo "${0##*/} - Install components to container
+
+Options
+    -c <container_id>
+        specify the container to install components to
+    [-u <uid>]
+        specify the user ID for the installed components
+    [-g <gid>]
+        specify the group ID for the installed components
+    [-h]
+        print this help message and exit"
+}
+
+# Entry point
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    set -e
+    trap '' EXIT
+
+    parse_flags "$@"
+
+    tar -c -f - --owner="$CUID" --group="$CGID" custom_components/volcengine_voice_assistant/ | docker cp -a - "$CONTAINER_ID":/config
+    exit 0
+fi

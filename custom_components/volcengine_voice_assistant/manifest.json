@@ -1,0 +1,12 @@
+{
+    "domain": "volcengine_voice_assistant",
+    "name": "Volcengine Voice Assistant",
+    "version": "0.0.1",
+    "integration_type": "service",
+    "documentation": "https://github.com/zouy414/volcengine-voice-assistant",
+    "dependencies": [],
+    "codeowners": [
+        "@zouy414"
+    ],
+    "config_flow": true
+}
