@@ -156,6 +156,8 @@ class Provider(SpeechToTextEntity):
 
                 # Start a separate task to send audio segments to the server
                 async def sender():
+                    # FIXME: Need fix following bug
+                    # Failed to process audio stream: WebSocket closed unexpectedly: {'code': 45000151, 'event': 0, 'is_last_package': False, 'payload_sequence': 0, 'payload_size': 123, 'payload_msg': {'error': '[Invalid audio format] OperatorWrapper Process failed: fail to feed audio into decoder. invalid WAV file format'}}
                     async for segment in stream:
                         await client.send_segment(segment)
                     await client.disconnect()
