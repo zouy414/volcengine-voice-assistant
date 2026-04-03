@@ -10,7 +10,7 @@ from homeassistant.components.stt import (AsyncIterable, AudioBitRates,
                                           AudioFormats, AudioSampleRates,
                                           SpeechMetadata, SpeechResult,
                                           SpeechResultState,
-                                          SpeechToTextEntity, SpeechToTextView)
+                                          SpeechToTextEntity)
 from homeassistant.config_entries import (ConfigEntry, ConfigSubentryFlow,
                                           SubentryFlowResult)
 from homeassistant.core import Any, HomeAssistant
@@ -19,7 +19,6 @@ from homeassistant.helpers.entity_platform import \
 
 from custom_components.volcengine_voice_assistant import DOMAIN, LOGGER
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
-from custom_components.volcengine_voice_assistant.sdk.utils import judge_wav
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
