@@ -1,6 +1,6 @@
 {
     "config_subentries": {
-        "add_stt_service": {
+        "stt": {
             "initiate_flow": {
                 "user": "Add STT Service",
                 "reconfigure": "Reconfigure STT Service"
@@ -17,7 +17,6 @@
                 },
                 "reconfigure": {
                     "data": {
-                        "name": "Name",
                         "url": "URL",
                         "app_key": "App Key",
                         "access_key": "Access Key",

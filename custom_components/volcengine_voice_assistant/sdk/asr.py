@@ -6,9 +6,9 @@ It provides a simple interface for sending audio data and receiving transcriptio
 
 import asyncio
 import json
-from logging import Logger
 import struct
 import uuid
+from logging import Logger
 from typing import Any, AsyncGenerator, Dict, Generator, List
 
 from aiohttp import ClientSession, ClientWebSocketResponse, WSMsgType
@@ -411,10 +411,10 @@ class Client:
                         break
 
                     if resp.code != 0:
-                        self.__logger.warning(
+                        self.__logger.error(
                             f"Recv response completed with code {resp.code}")
-                        yield resp
-                        break
+                        raise RuntimeError(
+                            f"WebSocket closed unexpectedly: {resp.to_dict()}")
 
                     yield resp
                 elif msg.type == WSMsgType.ERROR:

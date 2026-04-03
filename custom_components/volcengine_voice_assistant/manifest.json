@@ -2,8 +2,9 @@
     "domain": "volcengine_voice_assistant",
     "name": "Volcengine Voice Assistant",
     "version": "0.0.1",
-    "integration_type": "service",
     "documentation": "https://github.com/zouy414/volcengine-voice-assistant",
+    "integration_type": "service",
+    "iot_class": "cloud_polling",
     "dependencies": [],
     "codeowners": [
         "@zouy414"

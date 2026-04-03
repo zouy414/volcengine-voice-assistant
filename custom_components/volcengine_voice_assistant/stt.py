@@ -2,33 +2,44 @@
 
 import asyncio
 import logging
-import voluptuous
 from logging import Logger
+
+import voluptuous
 from homeassistant.components.stt import (AsyncIterable, AudioBitRates,
                                           AudioChannels, AudioCodecs,
                                           AudioFormats, AudioSampleRates,
                                           SpeechMetadata, SpeechResult,
                                           SpeechResultState,
-                                          SpeechToTextEntity)
-from homeassistant.config_entries import ConfigEntry, ConfigSubentryFlow, SubentryFlowResult
+                                          SpeechToTextEntity, SpeechToTextView)
+from homeassistant.config_entries import (ConfigEntry, ConfigSubentryFlow,
+                                          SubentryFlowResult)
 from homeassistant.core import Any, HomeAssistant
-from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.entity_platform import \
+    AddConfigEntryEntitiesCallback
 
+from custom_components.volcengine_voice_assistant import DOMAIN, LOGGER
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
+from custom_components.volcengine_voice_assistant.sdk.utils import judge_wav
 
 
-async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
     """Setup stt provider"""
 
     for subentry in config_entry.subentries.values():
-        if subentry.subentry_type != "add_stt_service":
-            continue
+        try:
+            if subentry.subentry_type != "stt":
+                continue
 
-        async_add_entities(
-            [Provider(logging.getLogger(subentry.data["name"]), subentry.data["url"],
-                      subentry.data["app_key"], subentry.data["access_key"], subentry.data["resource_id"])],
-            config_subentry_id=subentry.subentry_id
-        )
+            provider = Provider(subentry.data["name"], subentry.data["url"], subentry.data["app_key"],
+                                subentry.data["access_key"], subentry.data["resource_id"])
+            async_add_entities(
+                [provider],
+                config_subentry_id=subentry.subentry_id
+            )
+        except Exception as e:
+            LOGGER.error(
+                f"Setup {subentry.data["name"]} failed: {e}")
+            raise
 
 
 class SubentryFlow(ConfigSubentryFlow):
@@ -50,7 +61,7 @@ class SubentryFlow(ConfigSubentryFlow):
         }
     )
 
-    __logger: Logger = logging.getLogger(__name__)
+    __logger: Logger = LOGGER.getChild(__qualname__)
 
     async def async_step_user(self, user_input: dict[str, Any]) -> SubentryFlowResult:
         if user_input is None:
@@ -89,14 +100,22 @@ class SubentryFlow(ConfigSubentryFlow):
 class Provider(SpeechToTextEntity):
     """Speech to text provider for Volcengine STT service."""
 
+    _attr_name: str = ""
+    _attr_unique_id: str = ""
+
     __logger: logging.Logger
     __url: str
     __app_key: str
     __access_key: str
     __resource_id: str = "volc.bigasr.sauc.duration"
 
-    def __init__(self, logger: logging.Logger, url: str, app_key: str, access_key: str, resource_id: str):
-        self.__logger = logger
+    def __init__(self, name: str, url: str, app_key: str, access_key: str, resource_id: str):
+        id = name.lower().replace(" ", "_")
+
+        self._attr_name = name
+        self._attr_unique_id = f"{DOMAIN}.{id}"
+
+        self.__logger = LOGGER.getChild(self.unique_id)
         self.__url = url
         self.__app_key = app_key
         self.__access_key = access_key
@@ -127,6 +146,7 @@ class Provider(SpeechToTextEntity):
         return [AudioChannels.CHANNEL_MONO]
 
     async def async_process_audio_stream(self, metadata: SpeechMetadata, stream: AsyncIterable[bytes]) -> SpeechResult:
+        self.__logger.info(f"Speech metadata: {metadata}")
         try:
             async with Client(self.__logger, self.__url, self.__app_key, self.__access_key,  self.__resource_id) as client:
                 # Connect to the server with the specified audio parameters
@@ -138,7 +158,9 @@ class Provider(SpeechToTextEntity):
                 # Start a separate task to send audio segments to the server
                 async def sender():
                     async for segment in stream:
-                        client.send_segment(segment)
+                        if not segment:
+                            continue
+                        await client.send_segment(segment)
                     await client.disconnect()
                 sender_task = asyncio.create_task(sender())
 
@@ -146,7 +168,10 @@ class Provider(SpeechToTextEntity):
                 result: str = ""
                 try:
                     async for response in client.recv():
-                        result = response.payload_msg.get("result").get("text")
+                        if not response.payload_msg:
+                            continue
+                        result = response.payload_msg.get(
+                            "result", {}).get("text", "")
 
                     return SpeechResult(result, SpeechResultState.SUCCESS)
                 except Exception as e:
