@@ -6,9 +6,9 @@ It provides a simple interface for sending audio data and receiving transcriptio
 
 import asyncio
 import json
+from logging import Logger
 import struct
 import uuid
-from enum import Enum
 from typing import Any, AsyncGenerator, Dict, Generator, List
 
 from aiohttp import ClientSession, ClientWebSocketResponse, WSMsgType
@@ -17,35 +17,31 @@ from custom_components.volcengine_voice_assistant.sdk.utils import (
     gzip_compress, gzip_decompress, read_audio_file, read_wav_info)
 
 
-class ProtocolVersion(Enum):
+class ProtocolVersion:
     V1 = 0b0001
 
 
-class MessageType(Enum):
+class MessageType:
     CLIENT_FULL_REQUEST = 0b0001
     CLIENT_AUDIO_ONLY_REQUEST = 0b0010
     SERVER_FULL_RESPONSE = 0b1001
     SERVER_ERROR_RESPONSE = 0b1111
 
 
-class MessageTypeSpecificFlags(Enum):
+class MessageTypeSpecificFlags:
     NO_SEQUENCE = 0b0000
     POS_SEQUENCE = 0b0001
     NEG_SEQUENCE = 0b0010
     NEG_WITH_SEQUENCE = 0b0011
 
 
-class SerializationType(Enum):
+class SerializationType:
     NO_SERIALIZATION = 0b0000
     JSON = 0b0001
 
 
-class CompressionType(Enum):
+class CompressionType:
     GZIP = 0b0001
-
-
-class ProtocolVersion(Enum):
-    V1 = 0b0001
 
 
 class Header:
@@ -104,17 +100,30 @@ class Header:
 
 
 class Request:
-    """Request for the streaming ASR protocol, containing the header and payload for a client request."""
-
     header: Header
     payload_bytes: bytes
     is_last: bool = False
 
+    def to_bytes(self, seq: int) -> bytes:
+        """Convert the request to bytes format for transmission, with the given sequence number and whether it's the last package."""
+
+        compressed_payload = gzip_compress(self.payload_bytes)
+
+        request = bytearray()
+        request.extend(self.header.to_bytes())
+        request.extend(struct.pack('>i', -seq if self.is_last else seq))
+        request.extend(struct.pack('>I', len(compressed_payload)))
+        request.extend(compressed_payload)
+
+        return bytes(request)
+
+
+class ConnectRequest(Request):
+    """Request for the streaming ASR protocol, containing the header and payload for a client request."""
+
     def __init__(self, uid: str,
                  audio_format: str = "wav", audio_codec: str = "raw", audio_rate: int = 16000, audio_bits: int = 16, audio_channels: int = 1,
                  model_name: str = "bigmodel", enable_itn: bool = True, enable_punc: bool = True, enable_ddc: bool = True, show_utterances: bool = True, enable_nonstream: bool = False):
-        """Init a request to initialize the ASR session with the given audio parameters and model configuration."""
-
         self.header = Header.default_header().with_message_type_specific_flags(
             MessageTypeSpecificFlags.POS_SEQUENCE)
         self.payload_bytes = json.dumps({
@@ -138,35 +147,20 @@ class Request:
             }
         }).encode('utf-8')
 
-    def __init__(self, segment: bytes):
-        """Init a request with an audio segment for streaming ASR processing."""
 
-        self.header = Header.default_header().with_message_type(
-            MessageType.CLIENT_AUDIO_ONLY_REQUEST).with_message_type_specific_flags(
-                MessageTypeSpecificFlags.POS_SEQUENCE)
+class SegmentRequest(Request):
+    def __init__(self, segment: bytes):
+        self.header = Header.default_header().with_message_type_specific_flags(
+            MessageTypeSpecificFlags.POS_SEQUENCE).with_message_type(MessageType.CLIENT_AUDIO_ONLY_REQUEST)
         self.payload_bytes = segment
 
+
+class DisconnectRequest(Request):
     def __init__(self):
-        """Init a request to close connection"""
-
-        self.header = Header.default_header().with_message_type(
-            MessageType.CLIENT_AUDIO_ONLY_REQUEST).with_message_type_specific_flags(
-                MessageTypeSpecificFlags.NEG_WITH_SEQUENCE)
-        self.payload_bytes = bytes([0x00])
+        self.header = Header.default_header().with_message_type_specific_flags(
+            MessageTypeSpecificFlags.NEG_WITH_SEQUENCE).with_message_type(MessageType.CLIENT_AUDIO_ONLY_REQUEST)
+        self.payload_bytes = bytes()
         self.is_last = True
-
-    def to_bytes(self, seq: int) -> bytes:
-        """Convert the request to bytes format for transmission, with the given sequence number and whether it's the last package."""
-
-        compressed_payload = gzip_compress(self.payload_bytes)
-
-        request = bytearray()
-        request.extend(self.header.to_bytes())
-        request.extend(struct.pack('>i', self.is_last if -seq else seq))
-        request.extend(struct.pack('>I', len(compressed_payload)))
-        request.extend(compressed_payload)
-
-        return bytes(request)
 
 
 class Stream:
@@ -174,14 +168,6 @@ class Stream:
 
     __segment_duration: int
     __segments: List[bytes]
-
-    def __init__(self, file_path: str, sample_rate: int, segment_duration: int = 200):
-        """Init stream from a audio file."""
-
-        self.__init__(
-            read_audio_file(file_path, sample_rate),
-            segment_duration
-        )
 
     def __init__(self, content: bytes, segment_duration: int = 200):
         """Init stream from audio content in bytes."""
@@ -236,7 +222,7 @@ class Response:
     is_last_package: bool = False
     payload_sequence: int = 0
     payload_size: int = 0
-    payload_msg: str = None
+    payload_msg: dict = None
 
     def __init__(self, msg: bytes):
         self.header_size = msg[0] & 0x0f
@@ -280,7 +266,8 @@ class Response:
             if self.serialization_method == SerializationType.JSON:
                 self.payload_msg = json.loads(self.payload.decode('utf-8'))
         except Exception as e:
-            raise RuntimeError(f"Failed to decompress payload: {e}")
+            # raise RuntimeError(f"Failed to decompress payload: {e}")
+            pass
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the response to a dictionary format for easier access."""
@@ -301,13 +288,15 @@ class Client:
     NOTE: This client is not thread-safe and should be used within a single asyncio event loop.
     """
 
+    __logger: Logger
     __url: str
     __auth_header: Dict[str, str]
     __session: ClientSession = None
     __conn: ClientWebSocketResponse = None
     __seq: int = 1
 
-    def __init__(self, url: str, app_key: str, access_key: str,  resource_id: str):
+    def __init__(self, logger: Logger, url: str, app_key: str, access_key: str,  resource_id: str):
+        self.__logger = logger
         self.__url = url
         self.__auth_header = {
             "X-Api-App-Key": app_key,
@@ -325,11 +314,14 @@ class Client:
     async def open(self) -> 'Client':
         """Establish a WebSocket connection to the server."""
 
-        self.__session = ClientSession()
-        self.__conn = await self.__session.ws_connect(self.__url, headers=self.__auth_header)
-        self.__seq = 1
-
-        return self
+        try:
+            self.__session = ClientSession()
+            self.__conn = await self.__session.ws_connect(self.__url, headers=self.__auth_header)
+            self.__seq = 1
+            return self
+        except Exception as e:
+            self.__logger.error(f"Establish connection failed: {e}")
+            raise
 
     async def close(self):
         """Close the WebSocket connection."""
@@ -339,17 +331,29 @@ class Client:
         if self.__session and not self.__session.closed:
             await self.__session.close()
 
+    async def send_request(self, request: Request):
+        """Send a request to the server with the given Request object."""
+
+        try:
+            await self.__conn.send_bytes(request.to_bytes(self.__seq))
+            self.__seq += 1
+        except Exception as e:
+            self.__logger.error(f"Fail to send request: {e}")
+            raise
+
     async def connect(self, uid: str,
                       audio_format: str = "wav", audio_codec: str = "raw", audio_rate: int = 16000, audio_bits: int = 16, audio_channels: int = 1,
                       model_name: str = "bigmodel", enable_itn: bool = True, enable_punc: bool = True, enable_ddc: bool = True, show_utterances: bool = True, enable_nonstream: bool = False):
         """Send a request to initialize the ASR session with the given audio parameters and model configuration, and wait for the server response to confirm the connection is established."""
 
+        self.__logger.info("Connect")
+
         # Send full client request
         await self.send_request(
-            Request(
+            ConnectRequest(
                 uid=uid,
                 audio_format=audio_format, audio_codec=audio_codec, audio_rate=audio_rate, audio_bits=audio_bits, audio_channels=audio_channels,
-                model_name=model_name, enable_itn=enable_itn, nable_punc=enable_punc, enable_ddc=enable_ddc, show_utterances=show_utterances, enable_nonstream=enable_nonstream
+                model_name=model_name, enable_itn=enable_itn, enable_punc=enable_punc, enable_ddc=enable_ddc, show_utterances=show_utterances, enable_nonstream=enable_nonstream
             )
         )
 
@@ -361,28 +365,21 @@ class Client:
     async def disconnect(self):
         """Send a request to indicate the end of the stream and close the connection."""
 
+        self.__logger.info("Disconnect")
+
         # Send a final request with is_last=True to indicate the end of the stream
-        await self.send_request(Request())
-
-    async def send_request(self, request: Request):
-        """Send a request to the server with the given Request object."""
-
-        try:
-            await self.__conn.send_bytes(request.to_bytes(self.__seq))
-            self.__seq += 1
-        except Exception:
-            raise
+        await self.send_request(DisconnectRequest())
 
     async def send_segment(self, segment: bytes):
         """Send an audio segment to the server for ASR processing."""
 
         try:
-            await self.send_request(Request(segment))
+            await self.send_request(SegmentRequest(segment))
         except Exception:
             raise
 
     async def transmit_stream(self, stream: Stream) -> AsyncGenerator:
-        """Transmit the audio stream and yield responses from the server concurrently."""
+        """Transmit the audio stream."""
 
         for segment in stream.read():
             await self.send_segment(segment)
@@ -396,7 +393,8 @@ class Client:
             raise ValueError("File path is not existed")
 
         # Transmit audio stream
-        stream = Stream(file_path, sample_rate, segment_duration)
+        stream = Stream(read_audio_file(
+            file_path, sample_rate), segment_duration)
         async for response in self.transmit_stream(stream):
             yield response
 
@@ -409,9 +407,12 @@ class Client:
                     resp = Response(msg.data)
 
                     if resp.is_last_package:
+                        self.__logger.info("Recv response completed")
                         break
 
                     if resp.code != 0:
+                        self.__logger.warning(
+                            f"Recv response completed with code {resp.code}")
                         yield resp
                         break
 

@@ -10,7 +10,7 @@ class VolcengineVoiceAssistantConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
     MINOR_VERSION = 1
 
-    async def async_step_user(self, user_input: dict[str, Any]) -> ConfigFlowResult:
+    async def async_step_user(self, _: dict[str, Any]) -> ConfigFlowResult:
         if self._async_current_entries():
             return self.async_abort(reason="Already configured")
 
@@ -18,7 +18,7 @@ class VolcengineVoiceAssistantConfigFlow(ConfigFlow, domain=DOMAIN):
 
     @classmethod
     @callback
-    def async_get_supported_subentry_types(cls, config_entry: ConfigEntry) -> dict[str, type[ConfigSubentryFlow]]:
+    def async_get_supported_subentry_types(self, _: ConfigEntry) -> dict[str, type[ConfigSubentryFlow]]:
         return {
-            "stt": stt.SubentryFlow
+            "add_stt_service": stt.SubentryFlow
         }

@@ -33,10 +33,6 @@ def convert_wav_with_path(audio_path: str, sample_rate: int) -> bytes:
         result = subprocess.run(
             cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        try:
-            os.remove(audio_path)
-        except OSError as e:
-            pass
         return result.stdout
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Audio conversion failed: {e.stderr.decode()}")

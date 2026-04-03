@@ -1,7 +1,6 @@
 {
     "config_subentries": {
-        "stt": {
-            "entry_type": "STT Service",
+        "add_stt_service": {
             "initiate_flow": {
                 "user": "Add STT Service",
                 "reconfigure": "Reconfigure STT Service"
