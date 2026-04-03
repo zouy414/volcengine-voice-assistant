@@ -92,12 +92,6 @@ class Header:
         header.extend(self.reserved_data)
         return bytes(header)
 
-    @staticmethod
-    def default_header() -> 'Header':
-        """Create a default header with default values for all fields."""
-
-        return Header()
-
 
 class Request:
     header: Header
@@ -124,7 +118,7 @@ class ConnectRequest(Request):
     def __init__(self, uid: str, language: str,
                  audio_format: str = "wav", audio_codec: str = "raw", audio_rate: int = 16000, audio_bits: int = 16, audio_channels: int = 1,
                  model_name: str = "bigmodel", enable_itn: bool = True, enable_punc: bool = True, enable_ddc: bool = True, show_utterances: bool = True, enable_nonstream: bool = False):
-        self.header = Header.default_header().with_message_type_specific_flags(
+        self.header = Header().with_message_type_specific_flags(
             MessageTypeSpecificFlags.POS_SEQUENCE)
         self.payload_bytes = json.dumps({
             "user": {
@@ -151,14 +145,14 @@ class ConnectRequest(Request):
 
 class SegmentRequest(Request):
     def __init__(self, segment: bytes):
-        self.header = Header.default_header().with_message_type_specific_flags(
+        self.header = Header().with_message_type_specific_flags(
             MessageTypeSpecificFlags.POS_SEQUENCE).with_message_type(MessageType.CLIENT_AUDIO_ONLY_REQUEST)
         self.payload_bytes = segment
 
 
 class DisconnectRequest(Request):
     def __init__(self):
-        self.header = Header.default_header().with_message_type_specific_flags(
+        self.header = Header().with_message_type_specific_flags(
             MessageTypeSpecificFlags.NEG_WITH_SEQUENCE).with_message_type(MessageType.CLIENT_AUDIO_ONLY_REQUEST)
         self.payload_bytes = bytes()
         self.is_last = True
@@ -359,9 +353,11 @@ class Client:
         )
 
         # Wait for the server response to confirm the connection is established
-        msg = await self.__conn.receive()
-        if msg.type != WSMsgType.BINARY:
-            raise RuntimeError(f"Unexpected message type: {msg.type}")
+        resp = await self.__conn.receive()
+        if resp.type != WSMsgType.BINARY:
+            self.__logger.error(f"Connect failed, response: {resp}")
+            raise RuntimeError(f"Unexpected message type: {resp.type}")
+        self.__logger.info(f"Connect success, response: {resp}")
 
     async def disconnect(self):
         """Send a request to indicate the end of the stream and close the connection."""

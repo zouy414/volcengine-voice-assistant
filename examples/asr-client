@@ -10,7 +10,7 @@ from custom_components.volcengine_voice_assistant.sdk.asr import Client
 async def run(file: str, language: str, url: str, app_key: str, access_key: str,  resource_id: str):
     logger: Logger = logging.getLogger(__name__)
     async with Client(logger, url, app_key, access_key,  resource_id) as client:
-        await client.connect("demo", language)
+        await client.connect(__name__, language)
 
         async def sender():
             async for _ in client.send_file(file):
