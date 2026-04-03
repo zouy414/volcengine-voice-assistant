@@ -121,7 +121,7 @@ class Request:
 class ConnectRequest(Request):
     """Request for the streaming ASR protocol, containing the header and payload for a client request."""
 
-    def __init__(self, uid: str,
+    def __init__(self, uid: str, language: str,
                  audio_format: str = "wav", audio_codec: str = "raw", audio_rate: int = 16000, audio_bits: int = 16, audio_channels: int = 1,
                  model_name: str = "bigmodel", enable_itn: bool = True, enable_punc: bool = True, enable_ddc: bool = True, show_utterances: bool = True, enable_nonstream: bool = False):
         self.header = Header.default_header().with_message_type_specific_flags(
@@ -131,6 +131,7 @@ class ConnectRequest(Request):
                 "uid": uid
             },
             "audio": {
+                "language": language,
                 "format": audio_format,
                 "codec": audio_codec,
                 "rate": audio_rate,
@@ -341,7 +342,7 @@ class Client:
             self.__logger.error(f"Fail to send request: {e}")
             raise
 
-    async def connect(self, uid: str,
+    async def connect(self, uid: str, language: str,
                       audio_format: str = "wav", audio_codec: str = "raw", audio_rate: int = 16000, audio_bits: int = 16, audio_channels: int = 1,
                       model_name: str = "bigmodel", enable_itn: bool = True, enable_punc: bool = True, enable_ddc: bool = True, show_utterances: bool = True, enable_nonstream: bool = False):
         """Send a request to initialize the ASR session with the given audio parameters and model configuration, and wait for the server response to confirm the connection is established."""
@@ -351,7 +352,7 @@ class Client:
         # Send full client request
         await self.send_request(
             ConnectRequest(
-                uid=uid,
+                uid=uid, language=language,
                 audio_format=audio_format, audio_codec=audio_codec, audio_rate=audio_rate, audio_bits=audio_bits, audio_channels=audio_channels,
                 model_name=model_name, enable_itn=enable_itn, enable_punc=enable_punc, enable_ddc=enable_ddc, show_utterances=show_utterances, enable_nonstream=enable_nonstream
             )
@@ -407,12 +408,12 @@ class Client:
                     resp = Response(msg.data)
 
                     if resp.is_last_package:
-                        self.__logger.info("Recv response completed")
+                        self.__logger.info("Recv completed")
                         break
 
                     if resp.code != 0:
                         self.__logger.error(
-                            f"Recv response completed with code {resp.code}")
+                            f"Connection close with code {resp.code}")
                         raise RuntimeError(
                             f"WebSocket closed unexpectedly: {resp.to_dict()}")
 

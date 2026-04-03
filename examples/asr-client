@@ -7,10 +7,10 @@ import logging
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
 
 
-async def run(file: str, url: str, app_key: str, access_key: str,  resource_id: str):
-    logger: Logger = logging.getLogger("demo")
+async def run(file: str, language: str, url: str, app_key: str, access_key: str,  resource_id: str):
+    logger: Logger = logging.getLogger(__name__)
     async with Client(logger, url, app_key, access_key,  resource_id) as client:
-        await client.connect("demo")
+        await client.connect("demo", language)
 
         async def sender():
             async for _ in client.send_file(file):
@@ -40,15 +40,17 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="ASR WebSocket Client")
-    parser.add_argument("--file", type=str, required=True,
-                        help="Audio file path")
+    parser.add_argument("--file", type=str, help="Audio file path")
+    parser.add_argument("--language", type=str,
+                        default="zh-CN", help="Language")
     parser.add_argument(
         "--url", type=str, default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async", help="WebSocket URL")
-    parser.add_argument("--app-key", type=str,  help="App Key")
-    parser.add_argument("--access-key", type=str,  help="Access Key")
+    parser.add_argument("--app-key", type=str, required=True, help="App Key")
+    parser.add_argument("--access-key", type=str,
+                        required=True, help="Access Key")
     parser.add_argument("--resource-id", type=str,
                         default="volc.seedasr.sauc.duration", help="Resource Id")
     args = parser.parse_args()
 
-    asyncio.run(run(args.file, args.url, args.app_key,
+    asyncio.run(run(args.file, args.language, args.url, args.app_key,
                 args.access_key, args.resource_id))

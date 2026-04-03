@@ -123,15 +123,15 @@ class Provider(SpeechToTextEntity):
 
     @property
     def supported_languages(self) -> list[str]:
-        return ["zh-CN"]
+        return ["zh-CN", "en-US", "ja-JP", "id-ID", "es-MX", "pt-BR", "de-DE", "fr-FR", "ko-KR", "fil-PH", "ms-MY", "th-TH", "ar-SA", "it-IT", "bn-BD", "el-GR", "nl-NL", "ru-RU", "tr-TR", "vi-VN", "pl-PL", "ro-RO", "ne-NP", "uk-UA", "yue-CN"]
 
     @property
     def supported_formats(self) -> list[AudioFormats]:
-        return [AudioFormats.WAV]
+        return [AudioFormats.WAV, AudioFormats.OGG]
 
     @property
     def supported_codecs(self) -> list[AudioCodecs]:
-        return [AudioCodecs.PCM]
+        return [AudioCodecs.PCM, AudioCodecs.OPUS]
 
     @property
     def supported_bit_rates(self) -> list[AudioBitRates]:
@@ -143,7 +143,7 @@ class Provider(SpeechToTextEntity):
 
     @property
     def supported_channels(self) -> list[AudioChannels]:
-        return [AudioChannels.CHANNEL_MONO]
+        return [AudioChannels.CHANNEL_MONO, AudioChannels.CHANNEL_STEREO]
 
     async def async_process_audio_stream(self, metadata: SpeechMetadata, stream: AsyncIterable[bytes]) -> SpeechResult:
         self.__logger.info(f"Speech metadata: {metadata}")
@@ -151,15 +151,13 @@ class Provider(SpeechToTextEntity):
             async with Client(self.__logger, self.__url, self.__app_key, self.__access_key,  self.__resource_id) as client:
                 # Connect to the server with the specified audio parameters
                 await client.connect(
-                    self._attr_name,
+                    self._attr_name, metadata.language,
                     audio_format=metadata.format, audio_codec=metadata.codec, audio_rate=metadata.sample_rate, audio_bits=metadata.bit_rate, audio_channels=metadata.channel
                 )
 
                 # Start a separate task to send audio segments to the server
                 async def sender():
                     async for segment in stream:
-                        if not segment:
-                            continue
                         await client.send_segment(segment)
                     await client.disconnect()
                 sender_task = asyncio.create_task(sender())
@@ -170,8 +168,7 @@ class Provider(SpeechToTextEntity):
                     async for response in client.recv():
                         if not response.payload_msg:
                             continue
-                        result = response.payload_msg.get(
-                            "result", {}).get("text", "")
+                        result = response.payload_msg.get("result").get("text")
 
                     return SpeechResult(result, SpeechResultState.SUCCESS)
                 except Exception as e:
