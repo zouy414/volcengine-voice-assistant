@@ -408,7 +408,7 @@ class Client:
                         self.__logger.info("Recv completed")
                         break
 
-                    if resp.code != 0:
+                    if resp.code != 0 or resp.event != 0:
                         self.__logger.error(
                             f"Connection close with code {resp.code}")
                         raise RuntimeError(
