@@ -136,11 +136,11 @@ class Provider(SpeechToTextEntity):
 
     @property
     def supported_formats(self) -> list[AudioFormats]:
-        return [AudioFormats.WAV, AudioFormats.OGG]
+        return [AudioFormats.WAV]
 
     @property
     def supported_codecs(self) -> list[AudioCodecs]:
-        return [AudioCodecs.PCM, AudioCodecs.OPUS]
+        return [AudioCodecs.PCM]
 
     @property
     def supported_bit_rates(self) -> list[AudioBitRates]:
@@ -167,6 +167,7 @@ class Provider(SpeechToTextEntity):
                 # Start a separate task to send audio segments to the server
                 async def async_sender():
                     try:
+                        # NOTE: The segment from stream not include wav header
                         hugeSegment: bytes = b""
                         async for segment in stream:
                             hugeSegment += segment
