@@ -29,6 +29,9 @@
                         "app_key": "The app key for the STT service",
                         "access_key": "The access key for the STT service",
                         "resource_id": "The resource ID for the STT service"
+                    },
+                    "abort": {
+                        "already_configured": "Already Configured"
                     }
                 },
                 "reconfigure": {

@@ -20,13 +20,13 @@ from homeassistant.core import Any, HomeAssistant
 from homeassistant.helpers.entity_platform import \
     AddConfigEntryEntitiesCallback
 
-from custom_components.volcengine_voice_assistant import DOMAIN, LOGGER
+from custom_components.volcengine_voice_assistant import DOMAIN, LOGGER, gen_unique_id
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
 from custom_components.volcengine_voice_assistant.sdk.utils import \
     gen_wav_segment
 
 
-async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
+async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
     """Setup stt provider"""
 
     for subentry in config_entry.subentries.values():
@@ -34,7 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
             if subentry.subentry_type != "stt":
                 continue
 
-            provider = Provider(hass, subentry.data["name"], subentry.data["url"], subentry.data["app_key"],
+            provider = Provider(subentry.data["name"], subentry.data["url"], subentry.data["app_key"],
                                 subentry.data["access_key"], subentry.data["resource_id"])
             async_add_entities(
                 [provider],
@@ -74,7 +74,7 @@ class SubentryFlow(ConfigSubentryFlow):
         if not await self.__is_valid_user_input(user_input):
             return self.async_abort(reason="Can not connect to server")
 
-        return self.async_create_entry(title=user_input["name"], data=user_input)
+        return self.async_create_entry(title=user_input["name"], data=user_input, unique_id=gen_unique_id(user_input["name"]))
 
     async def async_step_reconfigure(self, user_input: dict[str, Any]) -> SubentryFlowResult:
         if user_input is None:
@@ -104,9 +104,6 @@ class SubentryFlow(ConfigSubentryFlow):
 class Provider(SpeechToTextEntity):
     """Speech to text provider for Volcengine STT service."""
 
-    hass: HomeAssistant
-    stream: True
-
     _attr_name: str = ""
     _attr_unique_id: str = ""
 
@@ -116,13 +113,9 @@ class Provider(SpeechToTextEntity):
     __access_key: str
     __resource_id: str = "volc.bigasr.sauc.duration"
 
-    def __init__(self, hass: HomeAssistant, name: str, url: str, app_key: str, access_key: str, resource_id: str):
-        id = name.lower().replace(" ", "_")
-
-        self.hass = hass
-
+    def __init__(self, name: str, url: str, app_key: str, access_key: str, resource_id: str):
         self._attr_name = name
-        self._attr_unique_id = f"{DOMAIN}.{id}"
+        self._attr_unique_id = gen_unique_id(name)
 
         self.__logger = LOGGER.getChild(self.unique_id)
         self.__url = url
