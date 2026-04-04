@@ -15,16 +15,14 @@ from homeassistant.config_entries import (ConfigEntry, ConfigSubentryFlow,
 from homeassistant.core import Any, HomeAssistant
 from homeassistant.helpers.entity_platform import \
     AddConfigEntryEntitiesCallback
+from homeassistant.helpers.selector import (SelectSelector,
+                                            SelectSelectorConfig,
+                                            SelectSelectorMode)
 
 from custom_components.volcengine_voice_assistant import LOGGER, gen_unique_id
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
 from custom_components.volcengine_voice_assistant.sdk.utils import \
     gen_wav_segment
-from homeassistant.helpers.selector import (
-    SelectSelector,
-    SelectSelectorConfig,
-    SelectSelectorMode,
-)
 
 
 async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:

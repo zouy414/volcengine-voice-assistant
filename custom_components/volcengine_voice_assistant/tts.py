@@ -1,23 +1,21 @@
 """Support for Volcengine TTS service."""
 
 import asyncio
+import uuid
 from logging import Logger
 from typing import Any, AsyncGenerator, Mapping
-import uuid
 
 import voluptuous
 from homeassistant.components.tts import (TextToSpeechEntity, TTSAudioRequest,
-                                          TTSAudioResponse, TtsAudioType, Voice)
+                                          TTSAudioResponse, Voice)
 from homeassistant.config_entries import (ConfigEntry, ConfigSubentryFlow,
                                           SubentryFlowResult)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import \
     AddConfigEntryEntitiesCallback
-from homeassistant.helpers.selector import (
-    SelectSelector,
-    SelectSelectorConfig,
-    SelectSelectorMode,
-)
+from homeassistant.helpers.selector import (SelectSelector,
+                                            SelectSelectorConfig,
+                                            SelectSelectorMode)
 
 from custom_components.volcengine_voice_assistant import LOGGER, gen_unique_id
 from custom_components.volcengine_voice_assistant.sdk.tts import Client
