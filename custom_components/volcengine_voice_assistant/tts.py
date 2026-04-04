@@ -13,6 +13,7 @@ from homeassistant.helpers.entity_platform import \
     AddConfigEntryEntitiesCallback
 
 from custom_components.volcengine_voice_assistant import LOGGER, gen_unique_id
+from custom_components.volcengine_voice_assistant.sdk.tts import Client
 
 
 async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
@@ -76,7 +77,9 @@ class SubentryFlow(ConfigSubentryFlow):
 
     async def __is_valid_user_input(self, user_input: dict[str, Any]) -> bool:
         try:
-            pass
+            async with Client(self.__logger, user_input["url"], user_input["app_key"], user_input["access_key"], user_input["resource_id"]) as client:
+                await client.async_connect()
+                await client.async_disconnect()
         except Exception as e:
             self.__logger.error(
                 f"Invalid user input: {user_input}, error: {e}")

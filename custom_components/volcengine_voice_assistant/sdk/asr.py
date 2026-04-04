@@ -5,10 +5,10 @@ It provides a simple interface for sending audio data and receiving transcriptio
 """
 
 import asyncio
-from enum import IntEnum
 import json
 import struct
 import uuid
+from enum import IntEnum
 from logging import Logger
 from typing import Any, AsyncGenerator, Dict, Generator, List
 
@@ -117,8 +117,8 @@ class ConnectRequest(Request):
     """Request for the streaming ASR protocol, containing the header and payload for a client request."""
 
     def __init__(self, uid: str, language: str,
-                 audio_format: str = "wav", audio_codec: str = "raw", audio_rate: int = 16000, audio_bits: int = 16, audio_channels: int = 1,
-                 model_name: str = "bigmodel", enable_itn: bool = True, enable_punc: bool = True, enable_ddc: bool = True, show_utterances: bool = True, enable_nonstream: bool = False):
+                 audio_format: str, audio_codec: str, audio_rate: int, audio_bits: int, audio_channels: int,
+                 model_name: str, enable_itn: bool, enable_punc: bool, enable_ddc: bool, show_utterances: bool, enable_nonstream: bool):
         self.header = Header().with_message_type_specific_flags(
             MessageTypeSpecificFlags.POS_SEQUENCE)
         self.payload_bytes = json.dumps({

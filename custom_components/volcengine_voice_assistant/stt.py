@@ -176,6 +176,8 @@ class Provider(SpeechToTextEntity):
                             continue
                         result = response.payload_msg.get("result").get("text")
 
+                    await sender_task
+
                     return SpeechResult(result, SpeechResultState.SUCCESS)
                 except Exception as e:
                     self.__logger.error(f"Failed to process audio stream: {e}")

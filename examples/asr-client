@@ -24,9 +24,10 @@ async def run(file: str, language: str, url: str, app_key: str, access_key: str,
         sender_task = asyncio.create_task(async_sender())
 
         try:
-            async for response in client.async_recv():
+            async for resp in client.async_recv():
                 logger.info(
-                    f"Recv payload msg: {response.payload_msg.get("result").get("text")}")
+                    f"Recv resp: {resp.payload_msg.get("result").get("text")}")
+            await sender_task
         except Exception as e:
             logger.error(f"Failed to process audio stream: {e}")
 
@@ -44,17 +45,28 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="ASR WebSocket Client")
-    parser.add_argument("--file", type=str, help="Audio file path")
+
+    parser.add_argument("--file", type=str, required=True,
+                        help="Audio file path")
+    parser.add_argument("--access-key", type=str,
+                        required=True, help="Access Key")
+    parser.add_argument("--app-key", type=str, required=True, help="App Key")
+
+    parser.add_argument("--resource-id", type=str,
+                        default="volc.seedasr.sauc.duration", help="Resource Id")
     parser.add_argument("--language", type=str,
                         default="zh-CN", help="Language")
     parser.add_argument(
         "--url", type=str, default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async", help="WebSocket URL")
-    parser.add_argument("--app-key", type=str, required=True, help="App Key")
-    parser.add_argument("--access-key", type=str,
-                        required=True, help="Access Key")
-    parser.add_argument("--resource-id", type=str,
-                        default="volc.seedasr.sauc.duration", help="Resource Id")
-    args = parser.parse_args()
 
-    asyncio.run(run(args.file, args.language, args.url, args.app_key,
-                args.access_key, args.resource_id))
+    args = parser.parse_args()
+    asyncio.run(
+        run(
+            args.file,
+            args.language,
+            args.url,
+            args.app_key,
+            args.access_key,
+            args.resource_id
+        )
+    )
