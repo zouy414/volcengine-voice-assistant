@@ -5,6 +5,7 @@ It provides a simple interface for sending audio data and receiving transcriptio
 """
 
 import asyncio
+from enum import IntEnum
 import json
 import struct
 import uuid
@@ -17,30 +18,30 @@ from custom_components.volcengine_voice_assistant.sdk.utils import (
     gzip_compress, gzip_decompress, read_audio_file, read_wav_info)
 
 
-class ProtocolVersion:
+class ProtocolVersion(IntEnum):
     V1 = 0b0001
 
 
-class MessageType:
+class MessageType(IntEnum):
     CLIENT_FULL_REQUEST = 0b0001
     CLIENT_AUDIO_ONLY_REQUEST = 0b0010
     SERVER_FULL_RESPONSE = 0b1001
     SERVER_ERROR_RESPONSE = 0b1111
 
 
-class MessageTypeSpecificFlags:
+class MessageTypeSpecificFlags(IntEnum):
     NO_SEQUENCE = 0b0000
     POS_SEQUENCE = 0b0001
     NEG_SEQUENCE = 0b0010
     NEG_WITH_SEQUENCE = 0b0011
 
 
-class SerializationType:
+class SerializationType(IntEnum):
     NO_SERIALIZATION = 0b0000
     JSON = 0b0001
 
 
-class CompressionType:
+class CompressionType(IntEnum):
     GZIP = 0b0001
 
 
@@ -297,7 +298,7 @@ class Client:
             "X-Api-App-Key": app_key,
             "X-Api-Access-Key": access_key,
             "X-Api-Resource-Id": resource_id,
-            "X-Api-Request-Id": str(uuid.uuid4())
+            "X-Api-Connect-Id": str(uuid.uuid4())
         }
 
     async def __aenter__(self) -> 'Client':
@@ -329,12 +330,17 @@ class Client:
     async def async_send_request(self, request: Request):
         """Send a request to the server with the given Request object."""
 
-        try:
-            await self.__conn.send_bytes(request.to_bytes(self.__seq))
-            self.__seq += 1
-        except Exception as e:
-            self.__logger.error(f"Fail to send request: {e}")
-            raise
+        await self.__conn.send_bytes(request.to_bytes(self.__seq))
+        self.__seq += 1
+
+    async def async_recv_response(self) -> 'Response':
+        """recv a request from the server."""
+
+        msg = await self.__conn.receive()
+        if msg.type != WSMsgType.BINARY:
+            raise RuntimeError(f"Unexpected message type: {msg.type}")
+
+        return Response(msg.data)
 
     async def async_connect(self, uid: str, language: str,
                             audio_format: str = "wav", audio_codec: str = "raw", audio_rate: int = 16000, audio_bits: int = 16, audio_channels: int = 1,
@@ -353,10 +359,7 @@ class Client:
         )
 
         # Wait for the server response to confirm the connection is established
-        resp = await self.__conn.receive()
-        if resp.type != WSMsgType.BINARY:
-            self.__logger.error(f"Connect failed, response: {resp}")
-            raise RuntimeError(f"Unexpected message type: {resp.type}")
+        resp = await self.async_recv_response()
         self.__logger.info(f"Connect success, response: {resp}")
 
     async def async_disconnect(self):
@@ -370,13 +373,10 @@ class Client:
     async def async_send_segment(self, segment: bytes):
         """Send an audio segment to the server for ASR processing."""
 
-        try:
-            await self.async_send_request(SegmentRequest(segment))
-        except Exception:
-            raise
+        await self.async_send_request(SegmentRequest(segment))
 
-    async def async_transmit_stream(self, stream: Stream) -> AsyncGenerator:
-        """Transmit the audio stream."""
+    async def async_send_stream(self, stream: Stream) -> AsyncGenerator:
+        """Send the audio stream."""
 
         for segment in stream.read():
             await self.async_send_segment(segment)
@@ -389,35 +389,30 @@ class Client:
         if not file_path:
             raise ValueError("File path is not existed")
 
-        # Transmit audio stream
+        # Send audio stream
         stream = Stream(read_audio_file(
             file_path, sample_rate), segment_duration)
-        async for response in self.async_transmit_stream(stream):
+        async for response in self.async_send_stream(stream):
             yield response
 
     async def async_recv(self) -> AsyncGenerator[Response]:
         """Receive responses from the server and yield them as Response objects until the last package is received or an error occurs."""
 
-        try:
-            async for msg in self.__conn:
-                self.__logger.error(f"{msg}")
-                if msg.type == WSMsgType.BINARY:
-                    resp = Response(msg.data)
+        async for msg in self.__conn:
+            if msg.type != WSMsgType.BINARY:
+                raise RuntimeError(
+                    f"WebSocket closed unexpectedly({WSMsgType.ERROR})")
 
-                    if resp.is_last_package:
-                        self.__logger.info("Recv completed")
-                        break
+            resp = Response(msg.data)
 
-                    if resp.code != 0 or resp.event != 0:
-                        self.__logger.error(
-                            f"Connection close with code {resp.code}")
-                        raise RuntimeError(
-                            f"WebSocket closed unexpectedly: {resp.to_dict()}")
+            if resp.is_last_package:
+                self.__logger.info("Recv completed")
+                break
 
-                    yield resp
-                elif msg.type == WSMsgType.ERROR:
-                    raise RuntimeError(f"WebSocket error: {msg.data}")
-                elif msg.type == WSMsgType.CLOSED:
-                    raise RuntimeError("WebSocket closed unexpectedly")
-        except Exception:
-            raise
+            if resp.code != 0 or resp.event != 0:
+                self.__logger.error(
+                    f"Connection close with code {resp.code}")
+                raise RuntimeError(
+                    f"WebSocket closed unexpectedly: {resp.to_dict()}")
+
+            yield resp
