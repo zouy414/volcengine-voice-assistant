@@ -1,12 +1,12 @@
 # Volcengine Voice Assistant
 
-Custom components for Home Assistant.
+Custom components for Home Assistant to integrate Volcengine STT/TTS service into Home Assistant.
 
 ## Quick Start
 
 ### Install
 
-#### By HACS
+#### Via HACS
 
 1. Go to `HACS`
 2. Add Custom repositories: https://github.com/zouy414/volcengine-voice-assistant
@@ -29,4 +29,6 @@ Custom components for Home Assistant.
 
 ### Setup TextToSpeech Service
 
-Develop In Progress
+1. Go to `Settings` -> `Devices & Services` -> `Volcengine Voice Assistant`.
+2. Click `Add TextToSpeech Service` button and fill out required field.
+3. Click `Submit` button
