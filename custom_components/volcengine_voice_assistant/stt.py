@@ -1,10 +1,7 @@
 """Support for Volcengine STT service."""
 
 import asyncio
-import io
 import logging
-import struct
-import wave
 from logging import Logger
 
 import voluptuous
@@ -20,7 +17,8 @@ from homeassistant.core import Any, HomeAssistant
 from homeassistant.helpers.entity_platform import \
     AddConfigEntryEntitiesCallback
 
-from custom_components.volcengine_voice_assistant import DOMAIN, LOGGER, gen_unique_id
+from custom_components.volcengine_voice_assistant import (
+    LOGGER, gen_unique_id)
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
 from custom_components.volcengine_voice_assistant.sdk.utils import \
     gen_wav_segment

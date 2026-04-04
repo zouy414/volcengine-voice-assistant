@@ -3,7 +3,6 @@
 
 import gzip
 import io
-import os
 import struct
 import subprocess
 import wave
