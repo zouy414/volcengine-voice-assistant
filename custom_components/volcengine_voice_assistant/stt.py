@@ -20,6 +20,11 @@ from custom_components.volcengine_voice_assistant import LOGGER, gen_unique_id
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
 from custom_components.volcengine_voice_assistant.sdk.utils import \
     gen_wav_segment
+from homeassistant.helpers.selector import (
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+)
 
 
 async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
@@ -45,19 +50,57 @@ async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_a
 class SubentryFlow(ConfigSubentryFlow):
     USER_DATA_SCHEMA = voluptuous.Schema(
         {
-            voluptuous.Required("name", default="Volcengine STT Service", ): str,
-            voluptuous.Required("url", default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async"): str,
+            voluptuous.Required("name", default="Volcengine STT Service"): str,
+            voluptuous.Required("url", default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async"): SelectSelector(
+                SelectSelectorConfig(
+                    options=[
+                        "wss://openspeech.bytedance.com/api/v3/sauc/bigmodel",
+                        "wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_nostream",
+                        "wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async"
+                    ],
+                    mode=SelectSelectorMode.DROPDOWN
+                )
+            ),
+            voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration"): SelectSelector(
+                SelectSelectorConfig(
+                    options=[
+                        "volc.bigasr.sauc.duration",
+                        "volc.bigasr.sauc.concurrent",
+                        "volc.seedasr.sauc.duration",
+                        "volc.seedasr.sauc.concurrent"
+                    ],
+                    mode=SelectSelectorMode.DROPDOWN
+                )
+            ),
             voluptuous.Required("app_key"): str,
             voluptuous.Required("access_key"): str,
-            voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration"): str
         }
     )
     RECONFIGURE_DATA_SCHEMA = voluptuous.Schema(
         {
-            voluptuous.Required("url", default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async"): str,
+            voluptuous.Required("url", default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async"): SelectSelector(
+                SelectSelectorConfig(
+                    options=[
+                        "wss://openspeech.bytedance.com/api/v3/sauc/bigmodel",
+                        "wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_nostream",
+                        "wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async"
+                    ],
+                    mode=SelectSelectorMode.DROPDOWN
+                )
+            ),
+            voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration"): SelectSelector(
+                SelectSelectorConfig(
+                    options=[
+                        "volc.bigasr.sauc.duration",
+                        "volc.bigasr.sauc.concurrent",
+                        "volc.seedasr.sauc.duration",
+                        "volc.seedasr.sauc.concurrent"
+                    ],
+                    mode=SelectSelectorMode.DROPDOWN
+                )
+            ),
             voluptuous.Required("app_key"): str,
             voluptuous.Required("access_key"): str,
-            voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration"): str
         }
     )
 
