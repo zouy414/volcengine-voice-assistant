@@ -14,7 +14,7 @@ class VolcengineVoiceAssistantConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, _: dict[str, Any]) -> ConfigFlowResult:
         if self._async_current_entries():
-            return self.async_abort(reason="Already configured")
+            return self.async_abort(reason="already_configured")
 
         return self.async_create_entry(title="Volcengine Voice Assistant", data={})
 

@@ -10,19 +10,18 @@ from custom_components.volcengine_voice_assistant.sdk.asr import Client
 async def run(file: str, language: str, url: str, app_key: str, access_key: str,  resource_id: str):
     logger: Logger = logging.getLogger(__name__)
     async with Client(logger, url, app_key, access_key,  resource_id) as client:
-        await client.connect(__name__, language)
+        await client.async_connect(__name__, language)
 
-        async def sender():
-            async for _ in client.send_file(file):
+        async def async_sender():
+            async for _ in client.async_send_file(file):
                 pass
-            await client.disconnect()
-        sender_task = asyncio.create_task(sender())
+            await client.async_disconnect()
+        sender_task = asyncio.create_task(async_sender())
 
         try:
-            async for response in client.recv():
+            async for response in client.async_recv():
                 logger.info(
                     f"Recv payload msg: {response.payload_msg.get("result").get("text")}")
-            logger.info(f"Recv completed")
         except Exception as e:
             logger.error(f"Failed to process audio stream: {e}")
 

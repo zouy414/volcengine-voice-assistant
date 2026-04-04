@@ -1,12 +1,21 @@
 {
+    "config": {
+        "flow_title": "Add Volcengine Voice Assistant",
+        "abort": {
+            "already_configured": "Already Configured"
+        }
+    },
     "config_subentries": {
         "stt": {
+            "flow_title": "Add SpeechToText Service",
+            "entry_type": "SpeechToText Service",
             "initiate_flow": {
-                "user": "Add STT Service",
-                "reconfigure": "Reconfigure STT Service"
+                "user": "Add SpeechToText Service",
+                "reconfigure": "Reconfigure SpeechToText Service"
             },
             "step": {
                 "user": {
+                    "title": "Add SpeechToText Service",
                     "data": {
                         "name": "Name",
                         "url": "URL",
@@ -16,6 +25,7 @@
                     }
                 },
                 "reconfigure": {
+                    "title": "Reconfigure SpeechToText Service",
                     "data": {
                         "url": "URL",
                         "app_key": "App Key",

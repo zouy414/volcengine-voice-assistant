@@ -301,12 +301,12 @@ class Client:
         }
 
     async def __aenter__(self) -> 'Client':
-        return await self.open()
+        return await self.async_open()
 
     async def __aexit__(self, exc_type, exc, tb):
-        await self.close()
+        await self.async_close()
 
-    async def open(self) -> 'Client':
+    async def async_open(self) -> 'Client':
         """Establish a WebSocket connection to the server."""
 
         try:
@@ -318,7 +318,7 @@ class Client:
             self.__logger.error(f"Establish connection failed: {e}")
             raise
 
-    async def close(self):
+    async def async_close(self):
         """Close the WebSocket connection."""
 
         if self.__conn and not self.__conn.closed:
@@ -326,7 +326,7 @@ class Client:
         if self.__session and not self.__session.closed:
             await self.__session.close()
 
-    async def send_request(self, request: Request):
+    async def async_send_request(self, request: Request):
         """Send a request to the server with the given Request object."""
 
         try:
@@ -336,15 +336,15 @@ class Client:
             self.__logger.error(f"Fail to send request: {e}")
             raise
 
-    async def connect(self, uid: str, language: str,
-                      audio_format: str = "wav", audio_codec: str = "raw", audio_rate: int = 16000, audio_bits: int = 16, audio_channels: int = 1,
-                      model_name: str = "bigmodel", enable_itn: bool = True, enable_punc: bool = True, enable_ddc: bool = True, show_utterances: bool = True, enable_nonstream: bool = False):
+    async def async_connect(self, uid: str, language: str,
+                            audio_format: str = "wav", audio_codec: str = "raw", audio_rate: int = 16000, audio_bits: int = 16, audio_channels: int = 1,
+                            model_name: str = "bigmodel", enable_itn: bool = True, enable_punc: bool = True, enable_ddc: bool = True, show_utterances: bool = True, enable_nonstream: bool = False):
         """Send a request to initialize the ASR session with the given audio parameters and model configuration, and wait for the server response to confirm the connection is established."""
 
         self.__logger.info("Connect")
 
         # Send full client request
-        await self.send_request(
+        await self.async_send_request(
             ConnectRequest(
                 uid=uid, language=language,
                 audio_format=audio_format, audio_codec=audio_codec, audio_rate=audio_rate, audio_bits=audio_bits, audio_channels=audio_channels,
@@ -359,31 +359,31 @@ class Client:
             raise RuntimeError(f"Unexpected message type: {resp.type}")
         self.__logger.info(f"Connect success, response: {resp}")
 
-    async def disconnect(self):
+    async def async_disconnect(self):
         """Send a request to indicate the end of the stream and close the connection."""
 
         self.__logger.info("Disconnect")
 
         # Send a final request with is_last=True to indicate the end of the stream
-        await self.send_request(DisconnectRequest())
+        await self.async_send_request(DisconnectRequest())
 
-    async def send_segment(self, segment: bytes):
+    async def async_send_segment(self, segment: bytes):
         """Send an audio segment to the server for ASR processing."""
 
         try:
-            await self.send_request(SegmentRequest(segment))
+            await self.async_send_request(SegmentRequest(segment))
         except Exception:
             raise
 
-    async def transmit_stream(self, stream: Stream) -> AsyncGenerator:
+    async def async_transmit_stream(self, stream: Stream) -> AsyncGenerator:
         """Transmit the audio stream."""
 
         for segment in stream.read():
-            await self.send_segment(segment)
+            await self.async_send_segment(segment)
             await asyncio.sleep(stream.segment_duration() / 1000)
             yield
 
-    async def send_file(self, file_path: str, segment_duration: int = 200, sample_rate: int = 16000) -> AsyncGenerator[Response]:
+    async def async_send_file(self, file_path: str, segment_duration: int = 200, sample_rate: int = 16000) -> AsyncGenerator[Response]:
         """Send an audio file for streaming ASR processing."""
 
         if not file_path:
@@ -392,10 +392,10 @@ class Client:
         # Transmit audio stream
         stream = Stream(read_audio_file(
             file_path, sample_rate), segment_duration)
-        async for response in self.transmit_stream(stream):
+        async for response in self.async_transmit_stream(stream):
             yield response
 
-    async def recv(self) -> AsyncGenerator[Response]:
+    async def async_recv(self) -> AsyncGenerator[Response]:
         """Receive responses from the server and yield them as Response objects until the last package is received or an error occurs."""
 
         try:

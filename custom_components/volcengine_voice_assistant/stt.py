@@ -64,7 +64,7 @@ class SubentryFlow(ConfigSubentryFlow):
 
     async def async_step_user(self, user_input: dict[str, Any]) -> SubentryFlowResult:
         if user_input is None:
-            return self.async_show_form(step_id="user", data_schema=self.USER_DATA_SCHEMA)
+            return self.async_show_form(step_id="setup", data_schema=self.USER_DATA_SCHEMA)
 
         if not await self.__is_valid_user_input(user_input):
             return self.async_abort(reason="Can not connect to server")
@@ -73,7 +73,7 @@ class SubentryFlow(ConfigSubentryFlow):
 
     async def async_step_reconfigure(self, user_input: dict[str, Any]) -> SubentryFlowResult:
         if user_input is None:
-            return self.async_show_form(step_id="reconfigure", data_schema=self.RECONFIGURE_DATA_SCHEMA)
+            return self.async_show_form(step_id="update", data_schema=self.RECONFIGURE_DATA_SCHEMA)
 
         if not await self.__is_valid_user_input(user_input):
             return self.async_abort(reason="Can not connect to server")
@@ -149,24 +149,24 @@ class Provider(SpeechToTextEntity):
         try:
             async with Client(self.__logger, self.__url, self.__app_key, self.__access_key,  self.__resource_id) as client:
                 # Connect to the server with the specified audio parameters
-                await client.connect(
+                await client.async_connect(
                     self._attr_name, metadata.language,
                     audio_format=metadata.format, audio_codec=metadata.codec, audio_rate=metadata.sample_rate, audio_bits=metadata.bit_rate, audio_channels=metadata.channel
                 )
 
                 # Start a separate task to send audio segments to the server
-                async def sender():
+                async def async_sender():
                     # FIXME: Need fix following bug
                     # Failed to process audio stream: WebSocket closed unexpectedly: {'code': 45000151, 'event': 0, 'is_last_package': False, 'payload_sequence': 0, 'payload_size': 123, 'payload_msg': {'error': '[Invalid audio format] OperatorWrapper Process failed: fail to feed audio into decoder. invalid WAV file format'}}
                     async for segment in stream:
-                        await client.send_segment(segment)
-                    await client.disconnect()
-                sender_task = asyncio.create_task(sender())
+                        await client.async_send_segment(segment)
+                    await client.async_disconnect()
+                sender_task = asyncio.create_task(async_sender())
 
                 # Collect responses from the server and concatenate them into a single result string
                 result: str = ""
                 try:
-                    async for response in client.recv():
+                    async for response in client.async_recv():
                         if not response.payload_msg:
                             continue
                         result = response.payload_msg.get("result").get("text")
