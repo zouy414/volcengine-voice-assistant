@@ -88,11 +88,11 @@ class SubentryFlow(ConfigSubentryFlow):
     async def __is_valid_user_input(self, user_input: dict[str, Any]) -> bool:
         try:
             async with Client(self.__logger, user_input["url"], user_input["app_key"], user_input["access_key"], user_input["resource_id"]) as client:
-                await client.connect(
-                    user_input["name"],
+                await client.async_connect(
+                    user_input["name"], "zh-CN",
                     audio_format=AudioFormats.WAV, audio_codec=AudioCodecs.PCM, audio_rate=AudioSampleRates.SAMPLERATE_16000, audio_bits=AudioBitRates.BITRATE_16, audio_channels=AudioChannels.CHANNEL_MONO
                 )
-                await client.disconnect()
+                await client.async_disconnect()
         except Exception as e:
             self.__logger.error(
                 f"Invalid user input: {user_input}, error: {e}")

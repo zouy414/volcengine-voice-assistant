@@ -46,9 +46,7 @@
                         "resource_id": "The resource ID for the STT service"
                     }
                 }
-            },
-            "error": {},
-            "abort": {}
+            }
         }
     }
 }
