@@ -49,19 +49,19 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 class SubentryFlow(ConfigSubentryFlow):
     USER_DATA_SCHEMA = voluptuous.Schema(
         {
-            voluptuous.Required("name", default="Volcengine STT Service", description="The name of the STT service"): str,
-            voluptuous.Required("url", default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async", description="The URL of the STT service"): str,
-            voluptuous.Required("app_key", description="The app key for the STT service"): str,
-            voluptuous.Required("access_key", description="The access key for the STT service"): str,
-            voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration", description="The resource ID for the STT service"): str
+            voluptuous.Required("name", default="Volcengine STT Service", ): str,
+            voluptuous.Required("url", default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async",): str,
+            voluptuous.Required("app_key"): str,
+            voluptuous.Required("access_key"): str,
+            voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration"): str
         }
     )
     RECONFIGURE_DATA_SCHEMA = voluptuous.Schema(
         {
-            voluptuous.Required("url", default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async", description="The URL of the STT service"): str,
-            voluptuous.Required("app_key", description="The app key for the STT service"): str,
-            voluptuous.Required("access_key", description="The access key for the STT service"): str,
-            voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration", description="The resource ID for the STT service"): str
+            voluptuous.Required("url", default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async"): str,
+            voluptuous.Required("app_key"): str,
+            voluptuous.Required("access_key"): str,
+            voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration"): str
         }
     )
 
@@ -69,7 +69,7 @@ class SubentryFlow(ConfigSubentryFlow):
 
     async def async_step_user(self, user_input: dict[str, Any]) -> SubentryFlowResult:
         if user_input is None:
-            return self.async_show_form(step_id="setup", data_schema=self.USER_DATA_SCHEMA)
+            return self.async_show_form(step_id="user", data_schema=self.USER_DATA_SCHEMA)
 
         if not await self.__is_valid_user_input(user_input):
             return self.async_abort(reason="Can not connect to server")
@@ -78,7 +78,7 @@ class SubentryFlow(ConfigSubentryFlow):
 
     async def async_step_reconfigure(self, user_input: dict[str, Any]) -> SubentryFlowResult:
         if user_input is None:
-            return self.async_show_form(step_id="update", data_schema=self.RECONFIGURE_DATA_SCHEMA)
+            return self.async_show_form(step_id="reconfigure", data_schema=self.RECONFIGURE_DATA_SCHEMA)
 
         if not await self.__is_valid_user_input(user_input):
             return self.async_abort(reason="Can not connect to server")
