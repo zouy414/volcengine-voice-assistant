@@ -1,7 +1,6 @@
 """Support for Volcengine STT service."""
 
 import asyncio
-import logging
 from logging import Logger
 
 import voluptuous
@@ -17,8 +16,7 @@ from homeassistant.core import Any, HomeAssistant
 from homeassistant.helpers.entity_platform import \
     AddConfigEntryEntitiesCallback
 
-from custom_components.volcengine_voice_assistant import (
-    LOGGER, gen_unique_id)
+from custom_components.volcengine_voice_assistant import LOGGER, gen_unique_id
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
 from custom_components.volcengine_voice_assistant.sdk.utils import \
     gen_wav_segment
@@ -48,7 +46,7 @@ class SubentryFlow(ConfigSubentryFlow):
     USER_DATA_SCHEMA = voluptuous.Schema(
         {
             voluptuous.Required("name", default="Volcengine STT Service", ): str,
-            voluptuous.Required("url", default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async",): str,
+            voluptuous.Required("url", default="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async"): str,
             voluptuous.Required("app_key"): str,
             voluptuous.Required("access_key"): str,
             voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration"): str
@@ -105,11 +103,11 @@ class Provider(SpeechToTextEntity):
     _attr_name: str = ""
     _attr_unique_id: str = ""
 
-    __logger: logging.Logger
+    __logger: Logger
     __url: str
     __app_key: str
     __access_key: str
-    __resource_id: str = "volc.bigasr.sauc.duration"
+    __resource_id: str
 
     def __init__(self, name: str, url: str, app_key: str, access_key: str, resource_id: str):
         self._attr_name = name

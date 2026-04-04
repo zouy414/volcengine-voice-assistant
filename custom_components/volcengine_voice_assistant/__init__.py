@@ -8,7 +8,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
 DOMAIN = "volcengine_voice_assistant"
-PLATFORMS = [Platform.STT]
+PLATFORMS = [Platform.STT, Platform.TTS]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -16,8 +16,6 @@ logging.basicConfig(
 )
 
 LOGGER: Logger = logging.getLogger(__name__)
-
-USED_UNIQUE_ID: list[str] = []
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

@@ -1,8 +1,8 @@
-from homeassistant.config_entries import (
-    Any, ConfigEntry, ConfigFlow, ConfigFlowResult, ConfigSubentryFlow,)
+from homeassistant.config_entries import (Any, ConfigEntry, ConfigFlow,
+                                          ConfigFlowResult, ConfigSubentryFlow)
 from homeassistant.core import callback
 
-from custom_components.volcengine_voice_assistant import DOMAIN, stt
+from custom_components.volcengine_voice_assistant import DOMAIN, stt, tts
 
 
 class VolcengineVoiceAssistantConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -21,5 +21,6 @@ class VolcengineVoiceAssistantConfigFlow(ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_supported_subentry_types(self, _: ConfigEntry) -> dict[str, type[ConfigSubentryFlow]]:
         return {
-            "stt": stt.SubentryFlow
+            "stt": stt.SubentryFlow,
+            "tts": tts.SubentryFlow
         }
