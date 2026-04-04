@@ -1,7 +1,10 @@
 """Support for Volcengine STT service."""
 
 import asyncio
+import io
 import logging
+import struct
+import wave
 from logging import Logger
 
 import voluptuous
@@ -19,6 +22,8 @@ from homeassistant.helpers.entity_platform import \
 
 from custom_components.volcengine_voice_assistant import DOMAIN, LOGGER
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
+from custom_components.volcengine_voice_assistant.sdk.utils import \
+    gen_wav_segment
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
@@ -29,7 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
             if subentry.subentry_type != "stt":
                 continue
 
-            provider = Provider(subentry.data["name"], subentry.data["url"], subentry.data["app_key"],
+            provider = Provider(hass, subentry.data["name"], subentry.data["url"], subentry.data["app_key"],
                                 subentry.data["access_key"], subentry.data["resource_id"])
             async_add_entities(
                 [provider],
@@ -99,6 +104,9 @@ class SubentryFlow(ConfigSubentryFlow):
 class Provider(SpeechToTextEntity):
     """Speech to text provider for Volcengine STT service."""
 
+    hass: HomeAssistant
+    stream: True
+
     _attr_name: str = ""
     _attr_unique_id: str = ""
 
@@ -108,8 +116,10 @@ class Provider(SpeechToTextEntity):
     __access_key: str
     __resource_id: str = "volc.bigasr.sauc.duration"
 
-    def __init__(self, name: str, url: str, app_key: str, access_key: str, resource_id: str):
+    def __init__(self, hass: HomeAssistant, name: str, url: str, app_key: str, access_key: str, resource_id: str):
         id = name.lower().replace(" ", "_")
+
+        self.hass = hass
 
         self._attr_name = name
         self._attr_unique_id = f"{DOMAIN}.{id}"
@@ -156,11 +166,16 @@ class Provider(SpeechToTextEntity):
 
                 # Start a separate task to send audio segments to the server
                 async def async_sender():
-                    # FIXME: Need fix following bug
-                    # Failed to process audio stream: WebSocket closed unexpectedly: {'code': 45000151, 'event': 0, 'is_last_package': False, 'payload_sequence': 0, 'payload_size': 123, 'payload_msg': {'error': '[Invalid audio format] OperatorWrapper Process failed: fail to feed audio into decoder. invalid WAV file format'}}
-                    async for segment in stream:
-                        await client.async_send_segment(segment)
-                    await client.async_disconnect()
+                    try:
+                        hugeSegment: bytes = b""
+                        async for segment in stream:
+                            hugeSegment += segment
+                        await client.async_send_segment(gen_wav_segment(metadata.sample_rate, metadata.bit_rate, metadata.channel, hugeSegment))
+                    except Exception as e:
+                        self.__logger.error(f"Send segment failed: {e}")
+                        raise
+                    finally:
+                        await client.async_disconnect()
                 sender_task = asyncio.create_task(async_sender())
 
                 # Collect responses from the server and concatenate them into a single result string

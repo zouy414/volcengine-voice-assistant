@@ -400,6 +400,7 @@ class Client:
 
         try:
             async for msg in self.__conn:
+                self.__logger.error(f"{msg}")
                 if msg.type == WSMsgType.BINARY:
                     resp = Response(msg.data)
 

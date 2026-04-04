@@ -2,9 +2,11 @@
 """
 
 import gzip
+import io
 import os
 import struct
 import subprocess
+import wave
 from typing import Tuple
 
 
@@ -20,7 +22,37 @@ def judge_wav(data: bytes) -> bool:
     if len(data) < 44:
         return False
 
-    return data[:4] == b'RIFF' and data[8:12] == b'WAVE'
+    try:
+        _ = wave.open(io.BytesIO(data), 'rb')
+        return True
+    except Exception:
+        return False
+
+
+def gen_wav_segment(sample_rate: int, bit_rate: int, channels: int, data: bytes = b"") -> bytes:
+    # wav header = 44 bytes
+    byte_rate = sample_rate * channels * int(bit_rate / 8)
+    block_align = channels * int(bit_rate / 8)
+    data_size = len(data)
+    data_buff = bytearray()
+    data_buff.extend(data)
+
+    buf = io.BytesIO()
+    buf.write(b'RIFF')
+    buf.write(struct.pack('<I', 36 + data_size))
+    buf.write(b'WAVEfmt ')
+    buf.write(struct.pack('<I', 16))  # Subchunk1Size (16 for PCM)
+    buf.write(struct.pack('<H', 1))   # AudioFormat PCM = 1
+    buf.write(struct.pack('<H', channels))
+    buf.write(struct.pack('<I', sample_rate))
+    buf.write(struct.pack('<I', byte_rate))
+    buf.write(struct.pack('<H', block_align))
+    buf.write(struct.pack('<H', bit_rate))  # bits per sample
+    buf.write(b'data')
+    buf.write(struct.pack('<I', data_size))
+    buf.write(data_buff)
+
+    return buf.getvalue()
 
 
 def convert_wav_with_path(audio_path: str, sample_rate: int) -> bytes:

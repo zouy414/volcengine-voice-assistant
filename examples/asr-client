@@ -1,8 +1,8 @@
 #!.venv/bin/python3
 
 import asyncio
-from logging import Logger
 import logging
+from logging import Logger
 
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
 
@@ -13,9 +13,14 @@ async def run(file: str, language: str, url: str, app_key: str, access_key: str,
         await client.async_connect(__name__, language)
 
         async def async_sender():
-            async for _ in client.async_send_file(file):
-                pass
-            await client.async_disconnect()
+            try:
+                async for _ in client.async_send_file(file):
+                    pass
+            except Exception as e:
+                logger.error(f"Send audio failed: {e}")
+                raise
+            finally:
+                await client.async_disconnect()
         sender_task = asyncio.create_task(async_sender())
 
         try:
