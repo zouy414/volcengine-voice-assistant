@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/zouy414/volcengine-voice-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/zouy414/volcengine-voice-assistant/actions/workflows/ci.yml)
 
-A third-part Custom components for Home Assistant to integrate Volcengine STT/TTS service.
+A third-party custom component for Home Assistant to integrate Volcengine STT/TTS services.
 
 ## Quick Start
 
