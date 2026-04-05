@@ -3,7 +3,7 @@
 import asyncio
 import uuid
 from logging import Logger
-from typing import Any, AsyncGenerator, Mapping
+from typing import Any, AsyncGenerator
 
 import voluptuous
 from homeassistant.components.tts import (TextToSpeechEntity, TTSAudioRequest,
@@ -18,35 +18,8 @@ from homeassistant.helpers.selector import (SelectSelector,
                                             SelectSelectorMode)
 
 from custom_components.volcengine_voice_assistant import LOGGER, gen_unique_id
+from custom_components.volcengine_voice_assistant.config import VALID_VOICES
 from custom_components.volcengine_voice_assistant.sdk.tts import Client
-
-VOICE_MAP: Mapping[str, Mapping[str, list[Voice]]] = {
-    "seed-tts-2.0": {
-        "zh-CN": {
-            Voice(voice_id="zh_female_vv_uranus_bigtts", name="Vivi 2.0"),
-            Voice(voice_id="zh_female_xiaohe_uranus_bigtts", name="小何 2.0"),
-            Voice(voice_id="zh_male_m191_uranus_bigtts", name="云舟 2.0"),
-            Voice(voice_id="zh_male_taocheng_uranus_bigtts", name="小天 2.0"),
-            Voice(voice_id="zh_male_liufei_uranus_bigtts", name="刘飞 2.0")
-        },
-        "en-US": {
-            Voice(voice_id="zh_female_vv_uranus_bigtts", name="Vivi 2.0"),
-            Voice(voice_id="zh_female_xiaohe_uranus_bigtts", name="小何 2.0"),
-            Voice(voice_id="zh_male_m191_uranus_bigtts", name="云舟 2.0"),
-            Voice(voice_id="zh_male_taocheng_uranus_bigtts", name="小天 2.0"),
-            Voice(voice_id="zh_male_liufei_uranus_bigtts", name="刘飞 2.0")
-        },
-        "ja-JP": {
-            Voice(voice_id="zh_female_vv_uranus_bigtts", name="Vivi 2.0")
-        },
-        "id-ID": {
-            Voice(voice_id="zh_female_vv_uranus_bigtts", name="Vivi 2.0")
-        },
-        "es-MX": {
-            Voice(voice_id="zh_female_vv_uranus_bigtts", name="Vivi 2.0")
-        }
-    }
-}
 
 
 async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
@@ -84,7 +57,7 @@ class SubentryFlow(ConfigSubentryFlow):
             ),
             voluptuous.Required("resource_id"): SelectSelector(
                 SelectSelectorConfig(
-                    options=list(VOICE_MAP.keys()),
+                    options=list(VALID_VOICES.keys()),
                     mode=SelectSelectorMode.DROPDOWN
                 )
             ),
@@ -107,7 +80,7 @@ class SubentryFlow(ConfigSubentryFlow):
             ),
             voluptuous.Required("resource_id"): SelectSelector(
                 SelectSelectorConfig(
-                    options=list(VOICE_MAP.keys()),
+                    options=list(VALID_VOICES.keys()),
                     mode=SelectSelectorMode.DROPDOWN
                 )
             ),
@@ -153,12 +126,8 @@ class Provider(TextToSpeechEntity):
 
     _attr_name: str = ""
     _attr_unique_id: str = ""
-    _attr_default_language: str = "zh-CN"
-    _attr_default_options: Mapping[str, Any] = {
-        "voice": "zh_female_vv_uranus_bigtts"}
-    _attr_supported_languages: list[str] = [
-        "zh-CN", "en-US", "ja-JP", "id-ID", "es-MX"]
-    _attr_supported_options: list[str] = ["voice"]
+    _attr_supported_languages: list[str] = []
+    _attr_supported_options: list[str] = []
 
     __logger: Logger
     __url: str
@@ -173,6 +142,9 @@ class Provider(TextToSpeechEntity):
     def __init__(self, name: str, url: str, app_key: str, access_key: str, resource_id: str):
         self._attr_name = name
         self._attr_unique_id = gen_unique_id(name)
+        self._attr_supported_languages = list(
+            VALID_VOICES.get(resource_id).keys())
+        self._attr_supported_options: list[str] = ["voice"]
 
         self.__logger = LOGGER.getChild(self.unique_id)
         self.__url = url
@@ -183,7 +155,7 @@ class Provider(TextToSpeechEntity):
     @callback
     def async_get_supported_voices(self, language: str) -> list[Voice]:
         """Return a list of supported voices for a language."""
-        return VOICE_MAP.get(self.__resource_id, {}).get(language, None)
+        return VALID_VOICES.get(self.__resource_id, {}).get(language, None)
 
     async def async_stream_tts_audio(self, request: TTSAudioRequest) -> TTSAudioResponse:
         return TTSAudioResponse(self.__encoding,  self.__async_stream_tts_audio(request))
@@ -194,7 +166,7 @@ class Provider(TextToSpeechEntity):
             try:
                 self.__logger.error(f"request: {request}")
                 await client.async_start_session(
-                    str(uuid.uuid4()), request.options.get("voice", ""),
+                    str(uuid.uuid4()), request.options.get("voice"),
                     self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter)
 
                 async def sender():

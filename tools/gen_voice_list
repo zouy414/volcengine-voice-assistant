@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cat tmp.yaml | grep "西语" | awk -F '|' '{print " Voice(voice_id=\"" $2 "\"" ",name=\"" $1 "\"),"}'
