@@ -4,6 +4,7 @@ This model improve from the official demo code, and is designed to be more user-
 It provides a simple interface for sending audio data and receiving transcriptions, while handling the underlying protocol details internally.
 """
 
+import asyncio
 import io
 import json
 import logging
@@ -659,12 +660,14 @@ class Client:
 
         await self.async_send_request(TaskRequest(self.__session_id, text, self.__voice_type, self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter))
 
-    async def async_recv(self) -> AsyncGenerator[Response]:
+    async def async_recv(self, timeout: float = 30) -> AsyncGenerator[Response]:
         """Receive responses from the server and yield them as Response objects until the session finished or an error occurs."""
 
-        async for msg in self.__conn:
+        while True:
+            msg = await asyncio.wait_for(self.__conn.__anext__(), timeout=timeout)
             if msg.type != WSMsgType.BINARY:
-                raise ValueError(f"Recv unexpectedly MsgType: {msg.type})=")
+                raise ValueError(
+                    f"Recv unexpectedly MsgType: {msg.type})=")
 
             resp = Response(msg.data)
 

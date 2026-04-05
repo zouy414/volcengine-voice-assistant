@@ -33,4 +33,4 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 def gen_unique_id(name: str):
-    return f"{{DOMAIN}}.{name.lower().replace(" ", "_")}"
+    return f"{DOMAIN}.{name.lower().replace(" ", "_")}"

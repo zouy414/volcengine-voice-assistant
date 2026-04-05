@@ -7,7 +7,7 @@ from typing import Any, AsyncGenerator
 
 import voluptuous
 from homeassistant.components.tts import (TextToSpeechEntity, TTSAudioRequest,
-                                          TTSAudioResponse, Voice)
+                                          TTSAudioResponse, TtsAudioType, Voice)
 from homeassistant.config_entries import (ConfigEntry, ConfigSubentryFlow,
                                           SubentryFlowResult)
 from homeassistant.core import HomeAssistant, callback
@@ -124,9 +124,9 @@ class SubentryFlow(ConfigSubentryFlow):
 
 
 class Provider(TextToSpeechEntity):
-
     _attr_name: str = ""
     _attr_unique_id: str = ""
+    _attr_default_language: str = "zh-CN"
     _attr_supported_languages: list[str] = []
     _attr_supported_options: list[str] = []
 
@@ -155,8 +155,15 @@ class Provider(TextToSpeechEntity):
 
     @callback
     def async_get_supported_voices(self, language: str) -> list[Voice]:
-        """Return a list of supported voices for a language."""
         return VALID_VOICES.get(self.__resource_id, {}).get(language, None)
+
+    def get_tts_audio(self, message: str, language: str, options: dict[str, Any]) -> TtsAudioType:
+        return asyncio.run(self.async_get_tts_audio(message, language, options))
+
+    async def async_get_tts_audio(self, message: str, language: str, options: dict[str, Any]) -> TtsAudioType:
+        async def message_gen() -> AsyncGenerator[bytes]:
+            yield message
+        return self.__enable_timestamp, await self.__async_stream_tts_audio(TTSAudioRequest(language=language, options=options, message_gen=message_gen()))
 
     async def async_stream_tts_audio(self, request: TTSAudioRequest) -> TTSAudioResponse:
         return TTSAudioResponse(self.__encoding,  self.__async_stream_tts_audio(request))
@@ -165,7 +172,6 @@ class Provider(TextToSpeechEntity):
         async with Client(self.__logger, self.__url, self.__app_key, self.__access_key, self.__resource_id) as client:
             await client.async_connect()
             try:
-                self.__logger.error(f"request: {request}")
                 await client.async_start_session(
                     str(uuid.uuid4()), request.options.get("voice"),
                     self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter)

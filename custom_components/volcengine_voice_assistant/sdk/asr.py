@@ -395,10 +395,10 @@ class Client:
         async for response in self.async_send_stream(stream):
             yield response
 
-    async def async_recv(self) -> AsyncGenerator[Response]:
+    async def async_recv(self, timeout: float = 30) -> AsyncGenerator[Response]:
         """Receive responses from the server and yield them as Response objects until the last package is received or an error occurs."""
-
-        async for msg in self.__conn:
+        while True:
+            msg = await asyncio.wait_for(self.__conn.__anext__(), timeout=timeout)
             if msg.type != WSMsgType.BINARY:
                 raise RuntimeError(
                     f"WebSocket closed unexpectedly({WSMsgType.ERROR})")
