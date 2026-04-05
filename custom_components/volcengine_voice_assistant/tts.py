@@ -71,8 +71,6 @@ class SubentryFlow(ConfigSubentryFlow):
                 SelectSelectorConfig(
                     options=[
                         "wss://openspeech.bytedance.com/api/v3/tts/bidirection",
-                        "wss://openspeech.bytedance.com/api/v3/tts/unidirectional/stream",
-                        "wss://openspeech.bytedance.com/api/v3/tts/bidirection",
                         "wss://openspeech.bytedance.com/api/v3/tts/unidirectional/stream"
                     ],
                     mode=SelectSelectorMode.DROPDOWN
@@ -102,24 +100,27 @@ class SubentryFlow(ConfigSubentryFlow):
 
     async def async_step_reconfigure(self, user_input: dict[str, Any]) -> SubentryFlowResult:
         if user_input is None:
-            return self.async_show_form(step_id="reconfigure", data_schema=self.RECONFIGURE_DATA_SCHEMA)
+            suggested_values = dict(self._get_reconfigure_subentry().data)
+            del suggested_values['access_key']
+            return self.async_show_form(step_id="reconfigure", data_schema=self.add_suggested_values_to_schema(self.RECONFIGURE_DATA_SCHEMA, suggested_values))
 
-        if not await self.__is_valid_user_input(user_input):
-            return self.async_abort(reason="Can not connect to server")
+        error: str = await self.__is_valid_user_input(user_input)
+        if error:
+            return self.async_abort(reason=error)
 
         return self.async_update_and_abort(self._get_entry(), self._get_reconfigure_subentry(), data_updates=user_input)
 
-    async def __is_valid_user_input(self, user_input: dict[str, Any]) -> bool:
+    async def __is_valid_user_input(self, user_input: dict[str, Any]) -> str:
         try:
             async with Client(self.__logger, user_input["url"], user_input["app_key"], user_input["access_key"], user_input["resource_id"]) as client:
                 await client.async_connect()
                 await client.async_disconnect()
+            return None
         except Exception as e:
+            del user_input["access_key"]
             self.__logger.error(
                 f"Invalid user input: {user_input}, error: {e}")
-            return False
-
-        return True
+            return f"{e}"
 
 
 class Provider(TextToSpeechEntity):
