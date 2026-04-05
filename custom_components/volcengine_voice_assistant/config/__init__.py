@@ -4,6 +4,12 @@ from typing import Mapping
 
 from homeassistant.components.tts import Voice
 
+DEFAULT_VOICES: Mapping[str, str] = {
+    "seed-tts-2.0": "zh_female_vv_uranus_bigtts",
+    "seed-tts-1.0": "zh_female_vv_mars_bigtts",
+    "seed-tts-1.0-concurr": "zh_female_vv_mars_bigtts"
+}
+
 # Valid voices config
 VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
     "seed-tts-2.0": {

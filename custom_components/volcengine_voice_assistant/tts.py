@@ -3,7 +3,7 @@
 import asyncio
 import uuid
 from logging import Logger
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Mapping
 
 import voluptuous
 from homeassistant.components.tts import (TextToSpeechEntity, TTSAudioRequest,
@@ -18,7 +18,7 @@ from homeassistant.helpers.selector import (SelectSelector,
                                             SelectSelectorMode)
 
 from . import LOGGER, gen_unique_id
-from .config import VALID_VOICES
+from .config import DEFAULT_VOICES, VALID_VOICES
 from .sdk.tts import Client
 
 
@@ -130,6 +130,7 @@ class Provider(TextToSpeechEntity):
     _attr_name: str = ""
     _attr_unique_id: str = ""
     _attr_default_language: str = "zh-CN"
+    _attr_default_options: Mapping[str, Any]
     _attr_supported_languages: list[str] = []
     _attr_supported_options: list[str] = []
 
@@ -146,6 +147,7 @@ class Provider(TextToSpeechEntity):
     def __init__(self, name: str, url: str, app_key: str, access_key: str, resource_id: str):
         self._attr_name = name
         self._attr_unique_id = gen_unique_id(name)
+        self._attr_default_options = {"voice": DEFAULT_VOICES.get(resource_id)}
         self._attr_supported_languages = list(
             VALID_VOICES.get(resource_id).keys())
         self._attr_supported_options: list[str] = ["voice"]
@@ -158,15 +160,10 @@ class Provider(TextToSpeechEntity):
 
     @callback
     def async_get_supported_voices(self, language: str) -> list[Voice]:
-        return VALID_VOICES.get(self.__resource_id, {}).get(language, None)
+        return VALID_VOICES.get(self.__resource_id).get(language)
 
     def get_tts_audio(self, message: str, language: str, options: dict[str, Any]) -> TtsAudioType:
         return asyncio.run(self.async_get_tts_audio(message, language, options))
-
-    async def async_get_tts_audio(self, message: str, language: str, options: dict[str, Any]) -> TtsAudioType:
-        async def message_gen() -> AsyncGenerator[bytes]:
-            yield message
-        return self.__enable_timestamp, await self.__async_stream_tts_audio(TTSAudioRequest(language=language, options=options, message_gen=message_gen()))
 
     async def async_stream_tts_audio(self, request: TTSAudioRequest) -> TTSAudioResponse:
         return TTSAudioResponse(self.__encoding,  self.__async_stream_tts_audio(request))

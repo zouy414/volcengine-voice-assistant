@@ -663,7 +663,7 @@ class Client:
         self.__enable_timestamp = enable_timestamp
         self.__disable_markdown_filter = disable_markdown_filter
 
-        self.__logger.info("Start disconnect")
+        self.__logger.info("Start connect")
 
         await self.async_send_request(StartSessionRequest(session_id, voice_type, encoding, sample_rate, enable_timestamp, disable_markdown_filter))
 
