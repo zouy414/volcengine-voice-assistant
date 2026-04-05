@@ -19,6 +19,8 @@ LOGGER: Logger = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up entry."""
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     async def listener(hass: HomeAssistant, entry: ConfigEntry):
@@ -29,8 +31,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
 def gen_unique_id(name: str):
+    """Generate unique id"""
+
     return f"{DOMAIN}.{name.lower().replace(" ", "_")}"

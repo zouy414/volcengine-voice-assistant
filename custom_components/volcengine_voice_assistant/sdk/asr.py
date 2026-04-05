@@ -14,15 +14,19 @@ from typing import Any, AsyncGenerator, Dict, Generator, List
 
 from aiohttp import ClientSession, ClientWebSocketResponse, WSMsgType
 
-from custom_components.volcengine_voice_assistant.sdk.utils import (
-    gzip_compress, gzip_decompress, read_audio_file, read_wav_info)
+from .utils import (gzip_compress, gzip_decompress,
+                    read_audio_file, read_wav_info)
 
 
 class ProtocolVersion(IntEnum):
+    """ProtocolVersion enum"""
+
     V1 = 0b0001
 
 
 class MessageType(IntEnum):
+    """MessageType enum"""
+
     CLIENT_FULL_REQUEST = 0b0001
     CLIENT_AUDIO_ONLY_REQUEST = 0b0010
     SERVER_FULL_RESPONSE = 0b1001
@@ -30,6 +34,8 @@ class MessageType(IntEnum):
 
 
 class MessageTypeSpecificFlags(IntEnum):
+    """MessageTypeSpecificFlags enum"""
+
     NO_SEQUENCE = 0b0000
     POS_SEQUENCE = 0b0001
     NEG_SEQUENCE = 0b0010
@@ -37,11 +43,15 @@ class MessageTypeSpecificFlags(IntEnum):
 
 
 class SerializationType(IntEnum):
+    """SerializationType enum"""
+
     NO_SERIALIZATION = 0b0000
     JSON = 0b0001
 
 
 class CompressionType(IntEnum):
+    """CompressionType enum"""
+
     GZIP = 0b0001
 
 
@@ -62,22 +72,32 @@ class Header:
         self.reserved_data = bytes([0x00])
 
     def with_message_type(self, message_type: int) -> 'Header':
+        """Setup message type"""
+
         self.message_type = message_type
         return self
 
     def with_message_type_specific_flags(self, flags: int) -> 'Header':
+        """Setup specific flags"""
+
         self.message_type_specific_flags = flags
         return self
 
     def with_serialization_type(self, serialization_type: int) -> 'Header':
+        """Setup serialization type"""
+
         self.serialization_type = serialization_type
         return self
 
     def with_compression_type(self, compression_type: int) -> 'Header':
+        """Setup compression type"""
+
         self.compression_type = compression_type
         return self
 
     def with_reserved_data(self, reserved_data: bytes) -> 'Header':
+        """Setup reserved data"""
+
         self.reserved_data = reserved_data
         return self
 
@@ -95,6 +115,8 @@ class Header:
 
 
 class Request:
+    """Base request"""
+
     header: Header
     payload_bytes: bytes
     is_last: bool = False
@@ -145,6 +167,8 @@ class ConnectRequest(Request):
 
 
 class SegmentRequest(Request):
+    """Request with segment data"""
+
     def __init__(self, segment: bytes):
         self.header = Header().with_message_type_specific_flags(
             MessageTypeSpecificFlags.POS_SEQUENCE).with_message_type(MessageType.CLIENT_AUDIO_ONLY_REQUEST)
@@ -152,6 +176,8 @@ class SegmentRequest(Request):
 
 
 class DisconnectRequest(Request):
+    """Request for disconnect"""
+
     def __init__(self):
         self.header = Header().with_message_type_specific_flags(
             MessageTypeSpecificFlags.NEG_WITH_SEQUENCE).with_message_type(MessageType.CLIENT_AUDIO_ONLY_REQUEST)
@@ -175,14 +201,11 @@ class Stream:
 
     @staticmethod
     def __get_segment_size(content: bytes, segment_duration: int) -> int:
-        try:
-            channel_num, samp_width, frame_rate, _, _ = read_wav_info(content)[
-                :5]
-            size_per_sec = channel_num * samp_width * frame_rate
-            segment_size = size_per_sec * segment_duration // 1000
-            return segment_size
-        except Exception:
-            raise
+        channel_num, samp_width, frame_rate, _, _ = read_wav_info(content)[
+            :5]
+        size_per_sec = channel_num * samp_width * frame_rate
+        segment_size = size_per_sec * segment_duration // 1000
+        return segment_size
 
     @staticmethod
     def __split_audio(data: bytes, segment_size: int) -> List[bytes]:
@@ -191,22 +214,21 @@ class Stream:
 
         segments: List[bytes] = []
         for i in range(0, len(data), segment_size):
-            end = i + segment_size
-            if end > len(data):
-                end = len(data)
+            end = end = min(i + segment_size, len(data))
             segments.append(data[i:end])
 
         return segments
 
     def read(self) -> Generator[bytes]:
         """Read audio segments one by one, and return the index and segment content."""
-        for segment in self.__segments:
-            yield segment
+        yield from self.__segments
 
     def length(self) -> int:
+        """Length of stream"""
         return len(self.__segments)
 
     def segment_duration(self) -> int:
+        """Segment duration """
         return self.__segment_duration
 
 
@@ -252,18 +274,11 @@ class Response:
 
         # Uncompress payload if needed
         if self.message_compression == CompressionType.GZIP:
-            try:
-                self.payload = gzip_decompress(self.payload)
-            except Exception as e:
-                raise RuntimeError(f"Failed to decompress payload: {e}")
+            self.payload = gzip_decompress(self.payload)
 
         # Parse payload
-        try:
-            if self.serialization_method == SerializationType.JSON:
-                self.payload_msg = json.loads(self.payload.decode('utf-8'))
-        except Exception as e:
-            # raise RuntimeError(f"Failed to decompress payload: {e}")
-            pass
+        if self.serialization_method == SerializationType.JSON:
+            self.payload_msg = json.loads(self.payload.decode('utf-8'))
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the response to a dictionary format for easier access."""
@@ -398,7 +413,7 @@ class Client:
     async def async_recv(self, timeout: float = 30) -> AsyncGenerator[Response]:
         """Receive responses from the server and yield them as Response objects until the last package is received or an error occurs."""
         while True:
-            msg = await asyncio.wait_for(self.__conn.__anext__(), timeout=timeout)
+            msg = await self.__conn.receive(timeout=timeout)
             if msg.type != WSMsgType.BINARY:
                 raise RuntimeError(
                     f"WebSocket closed unexpectedly({WSMsgType.ERROR})")

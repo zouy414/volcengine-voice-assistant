@@ -4,7 +4,6 @@ This model improve from the official demo code, and is designed to be more user-
 It provides a simple interface for sending audio data and receiving transcriptions, while handling the underlying protocol details internally.
 """
 
-import asyncio
 import io
 import json
 import logging
@@ -17,22 +16,20 @@ from typing import AsyncGenerator, Callable, Dict, List
 
 from aiohttp import ClientSession, ClientWebSocketResponse, WSMsgType
 
-logger = logging.getLogger(__name__)
-
 
 class MsgType(IntEnum):
     """Message type enumeration"""
 
-    Invalid = 0
-    FullClientRequest = 0b1
-    AudioOnlyClient = 0b10
-    FullServerResponse = 0b1001
-    AudioOnlyServer = 0b1011
-    FrontEndResultServer = 0b1100
-    Error = 0b1111
+    INVALID = 0
+    FULL_CLIENT_REQUEST = 0b1
+    AUDIO_ONLY_CLIENT = 0b10
+    FULL_SERVER_RESPONSE = 0b1001
+    AUDIO_ONLY_SERVER = 0b1011
+    FRONT_END_RESULT_SERVER = 0b1100
+    ERROR = 0b1111
 
     # Alias
-    ServerACK = AudioOnlyServer
+    SERVER_ACK = AUDIO_ONLY_SERVER
 
     def __str__(self) -> str:
         return self.name if self.name else f"MsgType({self.value})"
@@ -41,121 +38,121 @@ class MsgType(IntEnum):
 class MsgTypeFlagBits(IntEnum):
     """Message type flag bits"""
 
-    NoSeq = 0  # Non-terminal packet with no sequence
-    PositiveSeq = 0b1  # Non-terminal packet with sequence > 0
-    LastNoSeq = 0b10  # Last packet with no sequence
-    NegativeSeq = 0b11  # Last packet with sequence < 0
-    WithEvent = 0b100  # Payload contains event number (int32)
+    NO_SEQ = 0  # Non-terminal packet with no sequence
+    POSITIVE_SEQ = 0b1  # Non-terminal packet with sequence > 0
+    LAST_NO_SEQ = 0b10  # Last packet with no sequence
+    NEGATIVE_SEQ = 0b11  # Last packet with sequence < 0
+    WITH_EVENT = 0b100  # Payload contains event number (int32)
 
 
 class VersionBits(IntEnum):
     """Version bits"""
 
-    Version1 = 1
-    Version2 = 2
-    Version3 = 3
-    Version4 = 4
+    VERSION_1 = 1
+    VERSION_2 = 2
+    VERSION_3 = 3
+    VERSION_4 = 4
 
 
 class HeaderSizeBits(IntEnum):
     """Header size bits"""
 
-    HeaderSize4 = 1
-    HeaderSize8 = 2
-    HeaderSize12 = 3
-    HeaderSize16 = 4
+    HEADER_SIZE_4 = 1
+    HEADER_SIZE_8 = 2
+    HEADER_SIZE_12 = 3
+    HEADER_SIZE_16 = 4
 
 
 class SerializationBits(IntEnum):
     """Serialization method bits"""
 
-    Raw = 0
+    RAW = 0
     JSON = 0b1
-    Thrift = 0b11
-    Custom = 0b1111
+    THRIFT = 0b11
+    CUSTOM = 0b1111
 
 
 class CompressionBits(IntEnum):
     """Compression method bits"""
 
-    None_ = 0
-    Gzip = 0b1
-    Custom = 0b1111
+    NONE = 0
+    GZIP = 0b1
+    CUSTOM = 0b1111
 
 
 class EventType(IntEnum):
     """Event type enumeration"""
 
-    None_ = 0  # Default event
+    NONE = 0  # Default event
 
     # 1 ~ 49 Upstream Connection events
-    StartConnection = 1
-    StartTask = 1  # Alias of StartConnection
-    FinishConnection = 2
-    FinishTask = 2  # Alias of FinishConnection
+    START_CONNECTION = 1
+    START_TASK = 1  # Alias of START_CONNECTION
+    FINISH_CONNECTION = 2
+    FINISH_TASK = 2  # Alias of FINISH_CONNECTION
 
     # 50 ~ 99 Downstream Connection events
-    ConnectionStarted = 50  # Connection established successfully
-    TaskStarted = 50  # Alias of ConnectionStarted
+    CONNECTION_START = 50  # Connection established successfully
+    TASK_START = 50  # Alias of CONNECTION_START
     # Connection failed (possibly due to authentication failure)
-    ConnectionFailed = 51
-    TaskFailed = 51  # Alias of ConnectionFailed
-    ConnectionFinished = 52  # Connection ended
-    TaskFinished = 52  # Alias of ConnectionFinished
+    CONNECTION_FAILED = 51
+    TASK_FAILED = 51  # Alias of CONNECTION_FAILED
+    CONNECTION_FINISH = 52  # Connection ended
+    TASK_FINISH = 52  # Alias of CONNECTION_FINISH
 
     # 100 ~ 149 Upstream Session events
-    StartSession = 100
-    CancelSession = 101
-    FinishSession = 102
+    START_SESSION = 100
+    CANCEL_SESSION = 101
+    FINISH_SESSION = 102
 
     # 150 ~ 199 Downstream Session events
-    SessionStarted = 150
-    SessionCanceled = 151
-    SessionFinished = 152
-    SessionFailed = 153
-    UsageResponse = 154  # Usage response
-    ChargeData = 154  # Alias of UsageResponse
+    SESSION_START = 150
+    SESSION_CANCELED = 151
+    SESSION_FINISHED = 152
+    SESSION_FAILED = 153
+    USAGE_RESPONSE = 154  # Usage response
+    CHARGE_DATA = 154  # Alias of USAGE_RESPONSE
 
     # 200 ~ 249 Upstream general events
-    TaskRequest = 200
-    UpdateConfig = 201
+    TASK_REQUEST = 200
+    UPDATE_CONFIG = 201
 
     # 250 ~ 299 Downstream general events
-    AudioMuted = 250
+    AUDIO_MUTED = 250
 
     # 300 ~ 349 Upstream TTS events
-    SayHello = 300
+    SAY_HELLO = 300
 
     # 350 ~ 399 Downstream TTS events
-    TTSSentenceStart = 350
-    TTSSentenceEnd = 351
-    TTSResponse = 352
-    TTSEnded = 359
-    PodcastRoundStart = 360
-    PodcastRoundResponse = 361
-    PodcastRoundEnd = 362
+    TTS_SENTENCE_START = 350
+    TTS_SENTENCE_END = 351
+    TTS_RESPONSE = 352
+    TTS_ENDED = 359
+    POD_CAST_ROUND_START = 360
+    POD_CAST_ROUND_RESPONSE = 361
+    POD_CAST_ROUND_END = 362
 
     # 450 ~ 499 Downstream ASR events
-    ASRInfo = 450
-    ASRResponse = 451
-    ASREnded = 459
+    ASR_INFO = 450
+    ASR_RESPONSE = 451
+    ASR_ENDED = 459
 
     # 500 ~ 549 Upstream dialogue events
-    ChatTTSText = 500  # (Ground-Truth-Alignment) text for speech synthesis
+    CHAT_TTS_TEXT = 500  # (Ground-Truth-Alignment) text for speech synthesis
 
     # 550 ~ 599 Downstream dialogue events
-    ChatResponse = 550
-    ChatEnded = 559
+    CHAT_RESPONSE = 550
+    CHAT_ENDED = 559
 
     # 650 ~ 699 Downstream dialogue events
     # Events for source (original) language subtitle
-    SourceSubtitleStart = 650
-    SourceSubtitleResponse = 651
-    SourceSubtitleEnd = 652
+    SOURCE_SUBTITLE_START = 650
+    SOURCE_SUBTITLE_RESPONSE = 651
+    SOURCE_SUBTITLE_END = 652
     # Events for target (translation) language subtitle
-    TranslationSubtitleStart = 653
-    TranslationSubtitleResponse = 654
-    TranslationSubtitleEnd = 655
+    TRANSLATION_SUBTITLE_START = 653
+    TRANSLATION_SUBTITLE_RESPONSE = 654
+    TRANSLATION_SUBTITLE_END = 655
 
     def __str__(self) -> str:
         return self.name if self.name else f"EventType({self.value})"
@@ -187,14 +184,14 @@ class Message:
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     """
 
-    version: VersionBits = VersionBits.Version1
-    header_size: HeaderSizeBits = HeaderSizeBits.HeaderSize4
-    type: MsgType = MsgType.Invalid
-    flag: MsgTypeFlagBits = MsgTypeFlagBits.NoSeq
+    version: VersionBits = VersionBits.VERSION_1
+    header_size: HeaderSizeBits = HeaderSizeBits.HEADER_SIZE_4
+    type: MsgType = MsgType.INVALID
+    flag: MsgTypeFlagBits = MsgTypeFlagBits.NO_SEQ
     serialization: SerializationBits = SerializationBits.JSON
-    compression: CompressionBits = CompressionBits.None_
+    compression: CompressionBits = CompressionBits.NONE
 
-    event: EventType = EventType.None_
+    event: EventType = EventType.NONE
     session_id: str = ""
     connect_id: str = ""
     sequence: int = 0
@@ -278,19 +275,19 @@ class Message:
         """Get list of writer functions"""
         writers = []
 
-        if self.flag == MsgTypeFlagBits.WithEvent:
+        if self.flag == MsgTypeFlagBits.WITH_EVENT:
             writers.extend([self._write_event, self._write_session_id])
 
         if self.type in [
-            MsgType.FullClientRequest,
-            MsgType.FullServerResponse,
-            MsgType.FrontEndResultServer,
-            MsgType.AudioOnlyClient,
-            MsgType.AudioOnlyServer,
+            MsgType.FULL_CLIENT_REQUEST,
+            MsgType.FULL_SERVER_RESPONSE,
+            MsgType.FRONT_END_RESULT_SERVER,
+            MsgType.AUDIO_ONLY_CLIENT,
+            MsgType.AUDIO_ONLY_SERVER,
         ]:
-            if self.flag in [MsgTypeFlagBits.PositiveSeq, MsgTypeFlagBits.NegativeSeq]:
+            if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ, MsgTypeFlagBits.NEGATIVE_SEQ]:
                 writers.append(self._write_sequence)
-        elif self.type == MsgType.Error:
+        elif self.type == MsgType.ERROR:
             writers.append(self._write_error_code)
         else:
             raise ValueError(f"Unsupported message type: {self.type}")
@@ -303,20 +300,20 @@ class Message:
         readers = []
 
         if self.type in [
-            MsgType.FullClientRequest,
-            MsgType.FullServerResponse,
-            MsgType.FrontEndResultServer,
-            MsgType.AudioOnlyClient,
-            MsgType.AudioOnlyServer,
+            MsgType.FULL_CLIENT_REQUEST,
+            MsgType.FULL_SERVER_RESPONSE,
+            MsgType.FRONT_END_RESULT_SERVER,
+            MsgType.AUDIO_ONLY_CLIENT,
+            MsgType.AUDIO_ONLY_SERVER,
         ]:
-            if self.flag in [MsgTypeFlagBits.PositiveSeq, MsgTypeFlagBits.NegativeSeq]:
+            if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ, MsgTypeFlagBits.NEGATIVE_SEQ]:
                 readers.append(self._read_sequence)
-        elif self.type == MsgType.Error:
+        elif self.type == MsgType.ERROR:
             readers.append(self._read_error_code)
         else:
             raise ValueError(f"Unsupported message type: {self.type}")
 
-        if self.flag == MsgTypeFlagBits.WithEvent:
+        if self.flag == MsgTypeFlagBits.WITH_EVENT:
             readers.extend(
                 [self._read_event, self._read_session_id, self._read_connect_id]
             )
@@ -331,10 +328,10 @@ class Message:
     def _write_session_id(self, buffer: io.BytesIO) -> None:
         """Write session ID"""
         if self.event in [
-            EventType.StartConnection,
-            EventType.FinishConnection,
-            EventType.ConnectionStarted,
-            EventType.ConnectionFailed,
+            EventType.START_CONNECTION,
+            EventType.FINISH_CONNECTION,
+            EventType.CONNECTION_START,
+            EventType.CONNECTION_FAILED,
         ]:
             return
 
@@ -373,11 +370,11 @@ class Message:
     def _read_session_id(self, buffer: io.BytesIO) -> None:
         """Read session ID"""
         if self.event in [
-            EventType.StartConnection,
-            EventType.FinishConnection,
-            EventType.ConnectionStarted,
-            EventType.ConnectionFailed,
-            EventType.ConnectionFinished,
+            EventType.START_CONNECTION,
+            EventType.FINISH_CONNECTION,
+            EventType.CONNECTION_START,
+            EventType.CONNECTION_FAILED,
+            EventType.CONNECTION_FINISH,
         ]:
             return
 
@@ -392,9 +389,9 @@ class Message:
     def _read_connect_id(self, buffer: io.BytesIO) -> None:
         """Read connection ID"""
         if self.event in [
-            EventType.ConnectionStarted,
-            EventType.ConnectionFailed,
-            EventType.ConnectionFinished,
+            EventType.CONNECTION_START,
+            EventType.CONNECTION_FAILED,
+            EventType.CONNECTION_FINISH,
         ]:
             size_bytes = buffer.read(4)
             if size_bytes:
@@ -424,115 +421,144 @@ class Message:
 
     def __str__(self) -> str:
         """String representation"""
-        if self.type in [MsgType.AudioOnlyServer, MsgType.AudioOnlyClient]:
-            if self.flag in [MsgTypeFlagBits.PositiveSeq, MsgTypeFlagBits.NegativeSeq]:
+        if self.type in [MsgType.AUDIO_ONLY_SERVER, MsgType.AUDIO_ONLY_CLIENT]:
+            if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ, MsgTypeFlagBits.NEGATIVE_SEQ]:
                 return f"MsgType: {self.type}, EventType:{self.event}, Sequence: {self.sequence}, PayloadSize: {len(self.payload)}"
             return f"MsgType: {self.type}, EventType:{self.event}, PayloadSize: {len(self.payload)}"
-        elif self.type == MsgType.Error:
+
+        if self.type == MsgType.ERROR:
             return f"MsgType: {self.type}, EventType:{self.event}, ErrorCode: {self.error_code}, Payload: {self.payload.decode('utf-8', 'ignore')}"
-        else:
-            if self.flag in [MsgTypeFlagBits.PositiveSeq, MsgTypeFlagBits.NegativeSeq]:
-                return f"MsgType: {self.type}, EventType:{self.event}, Sequence: {self.sequence}, Payload: {self.payload.decode('utf-8', 'ignore')}"
-            return f"MsgType: {self.type}, EventType:{self.event}, Payload: {self.payload.decode('utf-8', 'ignore')}"
+
+        if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ, MsgTypeFlagBits.NEGATIVE_SEQ]:
+            return f"MsgType: {self.type}, EventType:{self.event}, Sequence: {self.sequence}, Payload: {self.payload.decode('utf-8', 'ignore')}"
+
+        return f"MsgType: {self.type}, EventType:{self.event}, Payload: {self.payload.decode('utf-8', 'ignore')}"
 
 
 class ConnectRequest(Message):
+    """Connect request"""
+
     def __init__(self):
-        self.type = MsgType.FullClientRequest
-        self.flag = MsgTypeFlagBits.WithEvent
-        self.event = EventType.StartConnection
-        self.payload = b"{}"
+        super().__init__(
+            type=MsgType.FULL_CLIENT_REQUEST,
+            flag=MsgTypeFlagBits.WITH_EVENT,
+            event=EventType.START_CONNECTION,
+            payload=b"{}"
+        )
 
 
 class DisconnectRequest(Message):
+    """Disconnect request"""
+
     def __init__(self):
-        self.type = MsgType.FullClientRequest
-        self.flag = MsgTypeFlagBits.WithEvent
-        self.event = EventType.FinishConnection
-        self.payload = b"{}"
+        super().__init__(
+            type=MsgType.FULL_CLIENT_REQUEST,
+            flag=MsgTypeFlagBits.WITH_EVENT,
+            event=EventType.FINISH_CONNECTION,
+            payload=b"{}"
+        )
 
 
 class StartSessionRequest(Message):
+    """StartSession request"""
+
     def __init__(self, session_id: str, voice_type: str, encoding: str, sample_rate: int, enable_timestamp: bool, disable_markdown_filter: bool):
-        self.type = MsgType.FullClientRequest
-        self.flag = MsgTypeFlagBits.WithEvent
-        self.event = EventType.StartSession
-        self.session_id = session_id
-        self.payload = json.dumps(
-            {
-                "user": {
-                    "uid": str(uuid.uuid4()),
-                },
-                "event": EventType.StartSession,
-                "namespace": "BidirectionalTTS",
-                "req_params": {
-                    "speaker": voice_type,
-                    "audio_params": {
-                        "format": encoding,
-                        "sample_rate": sample_rate,
-                        "enable_timestamp": enable_timestamp,
+        super().__init__(
+            type=MsgType.FULL_CLIENT_REQUEST,
+            flag=MsgTypeFlagBits.WITH_EVENT,
+            event=EventType.START_SESSION,
+            session_id=session_id,
+            payload=json.dumps(
+                {
+                    "user": {
+                        "uid": str(uuid.uuid4()),
                     },
-                    "additions": json.dumps(
-                        {
-                            "disable_markdown_filter": disable_markdown_filter,
-                        }
-                    ),
-                },
-            }
-        ).encode()
+                    "event": EventType.START_SESSION,
+                    "namespace": "BidirectionalTTS",
+                    "req_params": {
+                        "speaker": voice_type,
+                        "audio_params": {
+                            "format": encoding,
+                            "sample_rate": sample_rate,
+                            "enable_timestamp": enable_timestamp,
+                        },
+                        "additions": json.dumps(
+                            {
+                                "disable_markdown_filter": disable_markdown_filter,
+                            }
+                        ),
+                    },
+                }
+            ).encode()
+        )
 
 
 class FinishSessionRequest(Message):
+    """FinishSession request"""
+
     def __init__(self, session_id: str):
-        self.type = MsgType.FullClientRequest
-        self.flag = MsgTypeFlagBits.WithEvent
-        self.event = EventType.FinishSession
-        self.session_id = session_id
-        self.payload = b"{}"
+        super().__init__(
+            type=MsgType.FULL_CLIENT_REQUEST,
+            flag=MsgTypeFlagBits.WITH_EVENT,
+            event=EventType.FINISH_SESSION,
+            session_id=session_id,
+            payload=b"{}"
+        )
 
 
 class CancelSessionRequest(Message):
+    """CancelSession request"""
+
     def __init__(self, session_id: str):
-        self.type = MsgType.FullClientRequest
-        self.flag = MsgTypeFlagBits.WithEvent
-        self.event = EventType.CancelSession
-        self.session_id = session_id
-        self.payload = b"{}"
+        super().__init__(
+            type=MsgType.FULL_CLIENT_REQUEST,
+            flag=MsgTypeFlagBits.WITH_EVENT,
+            event=EventType.CANCEL_SESSION,
+            session_id=session_id,
+            payload=b"{}"
+        )
 
 
 class TaskRequest(Message):
+    """Task request"""
+
     def __init__(self, session_id: str, text: str, voice_type: str, encoding: str, sample_rate: int, enable_timestamp: bool, disable_markdown_filter: bool):
-        self.type = MsgType.FullClientRequest
-        self.flag = MsgTypeFlagBits.WithEvent
-        self.event = EventType.TaskRequest
-        self.session_id = session_id
-        self.payload = json.dumps(
-            {
-                "user": {
-                    "uid": str(uuid.uuid4()),
-                },
-                "event": EventType.TaskRequest,
-                "namespace": "BidirectionalTTS",
-                "req_params": {
-                    "speaker": voice_type,
-                    "audio_params": {
-                        "format": encoding,
-                        "sample_rate": sample_rate,
-                        "enable_timestamp": enable_timestamp,
+        super().__init__(
+            type=MsgType.FULL_CLIENT_REQUEST,
+            flag=MsgTypeFlagBits.WITH_EVENT,
+            event=EventType.TASK_REQUEST,
+            session_id=session_id,
+            payload=json.dumps(
+                {
+                    "user": {
+                        "uid": str(uuid.uuid4()),
                     },
-                    "additions": json.dumps(
-                        {
-                            "disable_markdown_filter": disable_markdown_filter,
-                        }
-                    ),
-                    "text": text,
-                },
-            }
-        ).encode()
+                    "event": EventType.TASK_REQUEST,
+                    "namespace": "BidirectionalTTS",
+                    "req_params": {
+                        "speaker": voice_type,
+                        "audio_params": {
+                            "format": encoding,
+                            "sample_rate": sample_rate,
+                            "enable_timestamp": enable_timestamp,
+                        },
+                        "additions": json.dumps(
+                            {
+                                "disable_markdown_filter": disable_markdown_filter,
+                            }
+                        ),
+                        "text": text,
+                    },
+                }
+            ).encode()
+        )
 
 
 class Response(Message):
+    """Response"""
+
     def __init__(self, data: bytes):
+        super().__init__()
         self.from_bytes(data)
 
 
@@ -591,9 +617,11 @@ class Client:
             await self.__session.close()
 
     async def async_send_request(self, message: Message):
+        """Send request"""
         await self.__conn.send_bytes(message.marshal())
 
     async def async_recv_response(self) -> 'Response':
+        """Recn response"""
         msg = await self.__conn.receive()
         if msg.type != WSMsgType.BINARY:
             raise ValueError(f"Unexpected message type: {msg.type}")
@@ -609,24 +637,25 @@ class Client:
         return resp
 
     async def async_connect(self):
+        """Send connect request to server"""
         self.__logger.info("Connect")
 
         await self.async_send_request(ConnectRequest())
 
-        resp: Response = await self.async_wait_for_event(MsgType.FullServerResponse, EventType.ConnectionStarted)
+        resp: Response = await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.CONNECTION_START)
         self.__logger.info(f"Connect success, response: {resp}")
 
     async def async_disconnect(self):
+        """Send disconnect request to server"""
         self.__logger.info("Disconnect")
 
         await self.async_send_request(DisconnectRequest())
 
-        resp: Response = await self.async_wait_for_event(MsgType.FullServerResponse, EventType.ConnectionFinished)
+        resp: Response = await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.CONNECTION_FINISH)
         self.__logger.info(f"Disonnect success, response: {resp}")
 
     async def async_start_session(self, session_id: str, voice_type: str, encoding: str = "mp3", sample_rate: int = 24000, enable_timestamp: bool = True, disable_markdown_filter: bool = False):
         """Start session"""
-
         self.__session_id = session_id
         self.__voice_type = voice_type
         self.__encoding = encoding
@@ -638,7 +667,7 @@ class Client:
 
         await self.async_send_request(StartSessionRequest(session_id, voice_type, encoding, sample_rate, enable_timestamp, disable_markdown_filter))
 
-        resp: Response = await self.async_wait_for_event(MsgType.FullServerResponse, EventType.SessionStarted)
+        resp: Response = await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.SESSION_START)
         self.__logger.info(f"Start session success, response: {resp}")
 
     async def async_finish_session(self):
@@ -664,14 +693,14 @@ class Client:
         """Receive responses from the server and yield them as Response objects until the session finished or an error occurs."""
 
         while True:
-            msg = await asyncio.wait_for(self.__conn.__anext__(), timeout=timeout)
+            msg = await self.__conn.receive(timeout=timeout)
             if msg.type != WSMsgType.BINARY:
                 raise ValueError(
                     f"Recv unexpectedly MsgType: {msg.type})=")
 
             resp = Response(msg.data)
 
-            if resp.type == MsgType.FullServerResponse and resp.event == EventType.SessionFinished:
+            if resp.type == MsgType.FULL_SERVER_RESPONSE and resp.event == EventType.SESSION_FINISHED:
                 break
 
             yield resp

@@ -10,14 +10,18 @@ from typing import Tuple
 
 
 def gzip_compress(data: bytes) -> bytes:
+    """Gzip compress"""
     return gzip.compress(data)
 
 
 def gzip_decompress(data: bytes) -> bytes:
+    """Gzip decompress"""
     return gzip.decompress(data)
 
 
 def judge_wav(data: bytes) -> bool:
+    """Judge a data is wav format"""
+
     if len(data) < 44:
         return False
 
@@ -29,8 +33,10 @@ def judge_wav(data: bytes) -> bool:
 
 
 def gen_wav_segment(sample_rate: int, bit_rate: int, channels: int, data: bytes = b"") -> bytes:
+    """Generate a wav segment"""
     buff = io.BytesIO()
 
+    # pylint: disable=E1101
     with wave.open(buff, 'wb') as wavf:
         wavf.setframerate(sample_rate)
         wavf.setsampwidth(bit_rate // 8)
@@ -41,21 +47,20 @@ def gen_wav_segment(sample_rate: int, bit_rate: int, channels: int, data: bytes 
 
 
 def convert_wav_with_path(audio_path: str, sample_rate: int) -> bytes:
-    try:
-        cmd = [
-            "ffmpeg", "-v", "quiet", "-y", "-i", audio_path,
-            "-acodec", "pcm_s16le", "-ac", "1", "-ar", str(sample_rate),
-            "-f", "wav", "-"
-        ]
-        result = subprocess.run(
-            cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    """Covert file to wav format"""
+    cmd = [
+        "ffmpeg", "-v", "quiet", "-y", "-i", audio_path,
+        "-acodec", "pcm_s16le", "-ac", "1", "-ar", str(sample_rate),
+        "-f", "wav", "-"
+    ]
+    result = subprocess.run(
+        cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"Audio conversion failed: {e.stderr.decode()}")
+    return result.stdout
 
 
 def read_wav_info(data: bytes) -> Tuple[int, int, int, int, bytes]:
+    """Read wav header"""
     if len(data) < 44:
         raise ValueError("Invalid WAV file: too short")
 
@@ -68,7 +73,7 @@ def read_wav_info(data: bytes) -> Tuple[int, int, int, int, bytes]:
         raise ValueError("Invalid WAV file: not WAVE format")
 
     # Parse fmt subchunk
-    audio_format = struct.unpack('<H', data[20:22])[0]
+    # audio_format = struct.unpack('<H', data[20:22])[0]
     num_channels = struct.unpack('<H', data[22:24])[0]
     sample_rate = struct.unpack('<I', data[24:28])[0]
     bits_per_sample = struct.unpack('<H', data[34:36])[0]
@@ -92,6 +97,7 @@ def read_wav_info(data: bytes) -> Tuple[int, int, int, int, bytes]:
 
 
 def read_audio_file(file_path: str, sample_rate: int) -> bytes:
+    """Read audio file"""
     with open(file_path, 'rb') as f:
         content = f.read()
 

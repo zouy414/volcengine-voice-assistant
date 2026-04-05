@@ -1,3 +1,5 @@
+"""Static configuration"""
+
 from typing import Mapping
 
 from homeassistant.components.tts import Voice

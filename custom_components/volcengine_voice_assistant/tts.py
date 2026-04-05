@@ -17,9 +17,9 @@ from homeassistant.helpers.selector import (SelectSelector,
                                             SelectSelectorConfig,
                                             SelectSelectorMode)
 
-from custom_components.volcengine_voice_assistant import LOGGER, gen_unique_id
-from custom_components.volcengine_voice_assistant.config import VALID_VOICES
-from custom_components.volcengine_voice_assistant.sdk.tts import Client
+from . import LOGGER, gen_unique_id
+from .config import VALID_VOICES
+from .sdk.tts import Client
 
 
 async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
@@ -37,12 +37,12 @@ async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_a
                 config_subentry_id=subentry.subentry_id
             )
         except Exception as e:
-            LOGGER.error(
-                f"Setup {subentry.data["name"]} failed: {e}")
+            LOGGER.error("Setup %s failed: %s", subentry.data["name"], e)
             raise
 
 
 class SubentryFlow(ConfigSubentryFlow):
+    """Handle subentry flow for adding and modifying a location."""
     USER_DATA_SCHEMA = voluptuous.Schema(
         {
             voluptuous.Required("name", default="Volcengine TTS Service", ): str,
@@ -90,6 +90,7 @@ class SubentryFlow(ConfigSubentryFlow):
     __logger: Logger = LOGGER.getChild(__qualname__)
 
     async def async_step_user(self, user_input: dict[str, Any]) -> SubentryFlowResult:
+        """User flow to add a new location."""
         if user_input is None:
             return self.async_show_form(step_id="user", data_schema=self.USER_DATA_SCHEMA)
 
@@ -99,6 +100,7 @@ class SubentryFlow(ConfigSubentryFlow):
         return self.async_create_entry(title=user_input["name"], data=user_input, unique_id=gen_unique_id(user_input["name"]))
 
     async def async_step_reconfigure(self, user_input: dict[str, Any]) -> SubentryFlowResult:
+        """User flow to modify an existing location."""
         if user_input is None:
             suggested_values = dict(self._get_reconfigure_subentry().data)
             del suggested_values['access_key']
@@ -124,6 +126,7 @@ class SubentryFlow(ConfigSubentryFlow):
 
 
 class Provider(TextToSpeechEntity):
+    """TextToSpeech provider"""
     _attr_name: str = ""
     _attr_unique_id: str = ""
     _attr_default_language: str = "zh-CN"
@@ -203,7 +206,6 @@ class Provider(TextToSpeechEntity):
                             "Sender task cancelled successfully")
                     except asyncio.CancelledError:
                         self.__logger.info("Sender task was already cancelled")
-                        pass
 
                     raise
             except Exception as e:

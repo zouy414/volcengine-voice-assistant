@@ -1,6 +1,8 @@
 # Volcengine Voice Assistant
 
-Custom components for Home Assistant to integrate Volcengine STT/TTS service into Home Assistant.
+[![CI](https://github.com/zouy414/volcengine-voice-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/zouy414/volcengine-voice-assistant/actions/workflows/ci.yml)
+
+A third-part Custom components for Home Assistant to integrate Volcengine STT/TTS service.
 
 ## Quick Start
 

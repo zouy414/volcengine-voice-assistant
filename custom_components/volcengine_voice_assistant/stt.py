@@ -19,9 +19,9 @@ from homeassistant.helpers.selector import (SelectSelector,
                                             SelectSelectorConfig,
                                             SelectSelectorMode)
 
-from custom_components.volcengine_voice_assistant import LOGGER, gen_unique_id
-from custom_components.volcengine_voice_assistant.sdk.asr import Client
-from custom_components.volcengine_voice_assistant.sdk.utils import \
+from . import LOGGER, gen_unique_id
+from .sdk.asr import Client
+from .sdk.utils import \
     gen_wav_segment
 
 
@@ -40,12 +40,12 @@ async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_a
                 config_subentry_id=subentry.subentry_id
             )
         except Exception as e:
-            LOGGER.error(
-                f"Setup {subentry.data["name"]} failed: {e}")
+            LOGGER.error("Setup %s failed: %s", subentry.data["name"], e)
             raise
 
 
 class SubentryFlow(ConfigSubentryFlow):
+    """Handle subentry flow for adding and modifying a location."""
     USER_DATA_SCHEMA = voluptuous.Schema(
         {
             voluptuous.Required("name", default="Volcengine STT Service"): str,
@@ -105,6 +105,7 @@ class SubentryFlow(ConfigSubentryFlow):
     __logger: Logger = LOGGER.getChild(__qualname__)
 
     async def async_step_user(self, user_input: dict[str, Any]) -> SubentryFlowResult:
+        """User flow to add a new location."""
         if user_input is None:
             return self.async_show_form(step_id="user", data_schema=self.USER_DATA_SCHEMA)
 
@@ -114,6 +115,7 @@ class SubentryFlow(ConfigSubentryFlow):
         return self.async_create_entry(title=user_input["name"], data=user_input, unique_id=gen_unique_id(user_input["name"]))
 
     async def async_step_reconfigure(self, user_input: dict[str, Any]) -> SubentryFlowResult:
+        """User flow to modify an existing location."""
         if user_input is None:
             suggested_values = dict(self._get_reconfigure_subentry().data)
             del suggested_values['access_key']
@@ -201,10 +203,10 @@ class Provider(SpeechToTextEntity):
                 async def async_sender():
                     try:
                         # NOTE: The segment from stream not include wav header
-                        hugeSegment: bytes = b""
+                        huge_segment: bytes = b""
                         async for segment in stream:
-                            hugeSegment += segment
-                        await client.async_send_segment(gen_wav_segment(metadata.sample_rate, metadata.bit_rate, metadata.channel, hugeSegment))
+                            huge_segment += segment
+                        await client.async_send_segment(gen_wav_segment(metadata.sample_rate, metadata.bit_rate, metadata.channel, huge_segment))
                     except Exception as e:
                         self.__logger.error(f"Send segment failed: {e}")
                         raise
@@ -233,7 +235,6 @@ class Provider(SpeechToTextEntity):
                             "Sender task cancelled successfully")
                     except asyncio.CancelledError:
                         self.__logger.info("Sender task was already cancelled")
-                        pass
 
                     return SpeechResult(result, SpeechResultState.ERROR)
         except Exception as e:
