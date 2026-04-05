@@ -107,7 +107,7 @@ class SubentryFlow(ConfigSubentryFlow):
         if not await self.__is_valid_user_input(user_input):
             return self.async_abort(reason="Can not connect to server")
 
-        return self.async_update_and_abort(self._get_entry(), self._get_reconfigure_subentry(), data=user_input)
+        return self.async_update_and_abort(self._get_entry(), self._get_reconfigure_subentry(), data_updates=user_input)
 
     async def __is_valid_user_input(self, user_input: dict[str, Any]) -> bool:
         try:
