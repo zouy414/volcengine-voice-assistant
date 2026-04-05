@@ -348,10 +348,10 @@ class Client:
         await self.__conn.send_bytes(request.to_bytes(self.__seq))
         self.__seq += 1
 
-    async def async_recv_response(self) -> 'Response':
+    async def async_recv_response(self, timeout: float = 30) -> 'Response':
         """recv a request from the server."""
 
-        msg = await self.__conn.receive()
+        msg = await self.__conn.receive(timeout)
         if msg.type != WSMsgType.BINARY:
             raise RuntimeError(f"Unexpected message type: {msg.type}")
 

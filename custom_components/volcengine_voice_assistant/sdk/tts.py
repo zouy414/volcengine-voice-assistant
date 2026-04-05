@@ -620,14 +620,14 @@ class Client:
         """Send request"""
         await self.__conn.send_bytes(message.marshal())
 
-    async def async_recv_response(self) -> 'Response':
+    async def async_recv_response(self, timeout: float = 30) -> 'Response':
         """Recn response"""
-        msg = await self.__conn.receive()
+        msg = await self.__conn.receive(timeout)
         if msg.type != WSMsgType.BINARY:
             raise ValueError(f"Unexpected message type: {msg.type}")
         return Response(msg.data)
 
-    async def async_wait_for_event(self, msg_type: MsgType, event_type: EventType,) -> Message:
+    async def async_wait_for_event(self, msg_type: MsgType, event_type: EventType) -> Message:
         """Wait for specific event"""
 
         resp: Response = await self.async_recv_response()
