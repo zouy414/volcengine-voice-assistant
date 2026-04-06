@@ -3,7 +3,6 @@
 
 import gzip
 import io
-import struct
 import subprocess
 import wave
 from typing import Tuple

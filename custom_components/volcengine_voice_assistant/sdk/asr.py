@@ -190,21 +190,12 @@ class Stream:
     __segment_duration: int
     __segments: List[bytes]
 
-    def __init__(self, content: bytes, segment_duration: int = 200):
+    def __init__(self, content: bytes, channel_num: int,
+                 samp_width: int, frame_rate: int, segment_duration):
         """Init stream from audio content in bytes."""
-
-        segment_size = self.__get_segment_size(content, segment_duration)
-
+        segment_size = channel_num * samp_width * frame_rate * segment_duration // 1000
         self.__segment_duration = segment_duration
         self.__segments = self.__split_audio(content, segment_size)
-
-    @staticmethod
-    def __get_segment_size(content: bytes, segment_duration: int) -> int:
-        channel_num, samp_width, frame_rate, _, _ = read_wav_info(content)[
-            :5]
-        size_per_sec = channel_num * samp_width * frame_rate
-        segment_size = size_per_sec * segment_duration // 1000
-        return segment_size
 
     @staticmethod
     def __split_audio(data: bytes, segment_size: int) -> List[bytes]:
@@ -229,6 +220,15 @@ class Stream:
     def segment_duration(self) -> int:
         """Segment duration """
         return self.__segment_duration
+
+
+class WAVStream(Stream):
+    """Stream of wav audio"""
+
+    def __init__(self, content: bytes, segment_duration: int = 200):
+        """Init stream from audio content in bytes."""
+        channel_num, samp_width, frame_rate = read_wav_info(content)
+        super().__init__(content, channel_num, samp_width, frame_rate, segment_duration)
 
 
 class Response:
@@ -379,26 +379,23 @@ class Client:
 
         await self.async_send_request(SegmentRequest(segment))
 
-    async def async_send_stream(self, stream: Stream) -> AsyncGenerator:
+    async def async_send_stream(self, stream: Stream):
         """Send the audio stream."""
 
         for segment in stream.read():
             await self.async_send_segment(segment)
             await asyncio.sleep(stream.segment_duration() / 1000)
-            yield
 
-    async def async_send_file(self, file_path: str, segment_duration: int = 200,
-                              sample_rate: int = 16000) -> AsyncGenerator[Response]:
+    async def async_send_file(
+            self, file_path: str, segment_duration: int = 200, sample_rate: int = 16000):
         """Send an audio file for streaming ASR processing."""
-
         if not file_path:
             raise ValueError("File path is not existed")
 
         # Send audio stream
-        stream = Stream(read_audio_file(
+        stream = WAVStream(read_audio_file(
             file_path, sample_rate), segment_duration)
-        async for response in self.async_send_stream(stream):
-            yield response
+        await self.async_send_stream(stream)
 
     async def async_recv(
             self, timeout: float = 30) -> AsyncGenerator[Response]:

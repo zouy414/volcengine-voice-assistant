@@ -20,8 +20,8 @@ from homeassistant.helpers.selector import (SelectSelector,
                                             SelectSelectorMode)
 
 from . import LOGGER, gen_unique_id
-from .sdk.asr import Client
-from .sdk.utils import gen_wav_segment
+from .sdk.asr import Client, Stream
+from .sdk.utils import gen_wav_content
 
 
 async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry,
@@ -160,6 +160,7 @@ class Provider(SpeechToTextEntity):
     __app_key: str
     __access_key: str
     __resource_id: str
+    __segment_duration: int = 200
 
     def __init__(self, name: str, url: str, app_key: str,
                  access_key: str, resource_id: str):
@@ -212,11 +213,23 @@ class Provider(SpeechToTextEntity):
                 # Start a separate task to send audio segments to the server
                 async def async_sender():
                     try:
+                        # Collect audio content
                         # NOTE: The segment from stream not include wav header
-                        huge_segment: bytes = b""
+                        content: bytes = b""
                         async for segment in stream:
-                            huge_segment += segment
-                        await client.async_send_segment(gen_wav_segment(metadata.sample_rate, metadata.bit_rate, metadata.channel, huge_segment))
+                            content += segment
+
+                        # Send audio content
+                        await client.async_send_stream(
+                            Stream(
+                                gen_wav_content(
+                                    metadata.sample_rate, metadata.bit_rate, metadata.channel, content),
+                                metadata.sample_rate,
+                                metadata.bit_rate // 8,
+                                metadata.channel,
+                                self.__segment_duration
+                            )
+                        )
                     except Exception as e:
                         self.__logger.exception("Send segment failed: %s", e)
                         raise
