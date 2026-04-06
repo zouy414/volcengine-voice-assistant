@@ -9,13 +9,12 @@ import json
 import struct
 import uuid
 from enum import IntEnum
-from logging import Logger
 from typing import Any, AsyncGenerator, Dict, Generator, List
 
 from aiohttp import ClientSession, ClientWebSocketResponse, WSMsgType
 
-from .utils import (gzip_compress, gzip_decompress,
-                    read_audio_file, read_wav_info)
+from .utils import (gzip_compress, gzip_decompress, read_audio_file,
+                    read_wav_info)
 
 
 class ProtocolVersion(IntEnum):
@@ -292,22 +291,22 @@ class Response:
             "payload_msg": self.payload_msg
         }
 
+    def __str__(self) -> str:
+        return str(self.to_dict())
+
 
 class Client:
     """Client for Volcengine Streaming ASR SDK.
 
     NOTE: This client is not thread-safe and should be used within a single asyncio event loop.
     """
-
-    __logger: Logger
     __url: str
     __auth_header: Dict[str, str]
     __session: ClientSession = None
     __conn: ClientWebSocketResponse = None
     __seq: int = 1
 
-    def __init__(self, logger: Logger, url: str, app_key: str, access_key: str,  resource_id: str):
-        self.__logger = logger
+    def __init__(self, url: str, app_key: str, access_key: str,  resource_id: str):
         self.__url = url
         self.__auth_header = {
             "X-Api-App-Key": app_key,
@@ -324,15 +323,10 @@ class Client:
 
     async def async_open(self) -> 'Client':
         """Establish a WebSocket connection to the server."""
-
-        try:
-            self.__session = ClientSession()
-            self.__conn = await self.__session.ws_connect(self.__url, headers=self.__auth_header)
-            self.__seq = 1
-            return self
-        except Exception as e:
-            self.__logger.error(f"Establish connection failed: {e}")
-            raise
+        self.__session = ClientSession()
+        self.__conn = await self.__session.ws_connect(self.__url, headers=self.__auth_header)
+        self.__seq = 1
+        return self
 
     async def async_close(self):
         """Close the WebSocket connection."""
@@ -353,17 +347,14 @@ class Client:
 
         msg = await self.__conn.receive(timeout)
         if msg.type != WSMsgType.BINARY:
-            raise RuntimeError(f"Unexpected message type: {msg.type}")
+            raise RuntimeError(f"Unexpected message type: {msg}")
 
         return Response(msg.data)
 
     async def async_connect(self, uid: str, language: str,
                             audio_format: str = "wav", audio_codec: str = "raw", audio_rate: int = 16000, audio_bits: int = 16, audio_channels: int = 1,
-                            model_name: str = "bigmodel", enable_itn: bool = True, enable_punc: bool = True, enable_ddc: bool = True, show_utterances: bool = True, enable_nonstream: bool = False):
+                            model_name: str = "bigmodel", enable_itn: bool = True, enable_punc: bool = True, enable_ddc: bool = True, show_utterances: bool = True, enable_nonstream: bool = False) -> Response:
         """Send a request to initialize the ASR session with the given audio parameters and model configuration, and wait for the server response to confirm the connection is established."""
-
-        self.__logger.info("Connect")
-
         # Send full client request
         await self.async_send_request(
             ConnectRequest(
@@ -374,14 +365,10 @@ class Client:
         )
 
         # Wait for the server response to confirm the connection is established
-        resp = await self.async_recv_response()
-        self.__logger.info(f"Connect success, response: {resp}")
+        return await self.async_recv_response()
 
     async def async_disconnect(self):
         """Send a request to indicate the end of the stream and close the connection."""
-
-        self.__logger.info("Disconnect")
-
         # Send a final request with is_last=True to indicate the end of the stream
         await self.async_send_request(DisconnectRequest())
 
@@ -421,12 +408,9 @@ class Client:
             resp = Response(msg.data)
 
             if resp.is_last_package:
-                self.__logger.info("Recv completed")
                 break
 
             if resp.code != 0 or resp.event != 0:
-                self.__logger.error(
-                    f"Connection close with code {resp.code}")
                 raise RuntimeError(
                     f"WebSocket closed unexpectedly: {resp.to_dict()}")
 

@@ -21,8 +21,7 @@ from homeassistant.helpers.selector import (SelectSelector,
 
 from . import LOGGER, gen_unique_id
 from .sdk.asr import Client
-from .sdk.utils import \
-    gen_wav_segment
+from .sdk.utils import gen_wav_segment
 
 
 async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
@@ -40,7 +39,7 @@ async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_a
                 config_subentry_id=subentry.subentry_id
             )
         except Exception as e:
-            LOGGER.error("Setup %s failed: %s", subentry.data["name"], e)
+            LOGGER.exception("Setup %s failed: %s", subentry.data["name"], e)
             raise
 
 
@@ -129,7 +128,7 @@ class SubentryFlow(ConfigSubentryFlow):
 
     async def __is_valid_user_input(self, user_input: dict[str, Any]) -> str:
         try:
-            async with Client(self.__logger, user_input["url"], user_input["app_key"], user_input["access_key"], user_input["resource_id"]) as client:
+            async with Client(user_input["url"], user_input["app_key"], user_input["access_key"], user_input["resource_id"]) as client:
                 await client.async_connect(
                     user_input["name"], "zh-CN",
                     audio_format=AudioFormats.WAV, audio_codec=AudioCodecs.PCM, audio_rate=AudioSampleRates.SAMPLERATE_16000, audio_bits=AudioBitRates.BITRATE_16, audio_channels=AudioChannels.CHANNEL_MONO
@@ -138,7 +137,7 @@ class SubentryFlow(ConfigSubentryFlow):
             return None
         except Exception as e:
             del user_input["access_key"]
-            self.__logger.error(
+            self.__logger.exception(
                 f"Invalid user input: {user_input}, error: {e}")
             return f"{e}"
 
@@ -190,15 +189,16 @@ class Provider(SpeechToTextEntity):
         return [AudioChannels.CHANNEL_MONO, AudioChannels.CHANNEL_STEREO]
 
     async def async_process_audio_stream(self, metadata: SpeechMetadata, stream: AsyncIterable[bytes]) -> SpeechResult:
-        self.__logger.info(f"Speech metadata: {metadata}")
-        try:
-            async with Client(self.__logger, self.__url, self.__app_key, self.__access_key,  self.__resource_id) as client:
-                # Connect to the server with the specified audio parameters
-                await client.async_connect(
-                    self._attr_name, metadata.language,
-                    audio_format=metadata.format, audio_codec=metadata.codec, audio_rate=metadata.sample_rate, audio_bits=metadata.bit_rate, audio_channels=metadata.channel
-                )
+        self.__logger.info(f"Start speech to text, metadata: {metadata}")
+        async with Client(self.__url, self.__app_key, self.__access_key,  self.__resource_id) as client:
+            # Connect to the server with the specified audio parameters
+            resp = await client.async_connect(
+                self._attr_name, metadata.language,
+                audio_format=metadata.format, audio_codec=metadata.codec, audio_rate=metadata.sample_rate, audio_bits=metadata.bit_rate, audio_channels=metadata.channel
+            )
+            self.__logger.info("Connect successfully, response: %s", resp)
 
+            try:
                 # Start a separate task to send audio segments to the server
                 async def async_sender():
                     try:
@@ -208,7 +208,7 @@ class Provider(SpeechToTextEntity):
                             huge_segment += segment
                         await client.async_send_segment(gen_wav_segment(metadata.sample_rate, metadata.bit_rate, metadata.channel, huge_segment))
                     except Exception as e:
-                        self.__logger.error(f"Send segment failed: {e}")
+                        self.__logger.exception(f"Send segment failed: {e}")
                         raise
                     finally:
                         await client.async_disconnect()
@@ -219,6 +219,8 @@ class Provider(SpeechToTextEntity):
                 try:
                     async for response in client.async_recv():
                         if not response.payload_msg:
+                            self.__logger.debug(
+                                "Recv not payload msg response: %s", response)
                             continue
                         result = response.payload_msg.get("result").get("text")
 
@@ -226,7 +228,7 @@ class Provider(SpeechToTextEntity):
 
                     return SpeechResult(result, SpeechResultState.SUCCESS)
                 except Exception as e:
-                    self.__logger.error(f"Failed to process audio stream: {e}")
+                    self.__logger.exception(f"Failed to process stream: {e}")
 
                     try:
                         sender_task.cancel()
@@ -234,9 +236,8 @@ class Provider(SpeechToTextEntity):
                         self.__logger.info(
                             "Sender task cancelled successfully")
                     except asyncio.CancelledError:
-                        self.__logger.info("Sender task was already cancelled")
+                        pass
 
-                    return SpeechResult(result, SpeechResultState.ERROR)
-        except Exception as e:
-            self.__logger.error(f"Process audio stream failed: {e}")
-            return SpeechResult(e, SpeechResultState.ERROR)
+                    return SpeechResult(e, SpeechResultState.ERROR)
+            except Exception as e:
+                self.__logger.exception(f"Speech to text failed: {e}")

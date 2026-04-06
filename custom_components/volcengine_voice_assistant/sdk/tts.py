@@ -6,12 +6,10 @@ It provides a simple interface for sending audio data and receiving transcriptio
 
 import io
 import json
-import logging
 import struct
 import uuid
 from dataclasses import dataclass
 from enum import IntEnum
-from logging import Logger
 from typing import AsyncGenerator, Callable, Dict, List
 
 from aiohttp import ClientSession, ClientWebSocketResponse, WSMsgType
@@ -568,7 +566,6 @@ class Client:
     NOTE: This client is not thread-safe and should be used within a single asyncio event loop.
     """
 
-    __logger: logging.Logger
     __url: str
     __auth_header: Dict[str, str]
     __session: ClientSession = None
@@ -581,8 +578,7 @@ class Client:
     __enable_timestamp: bool
     __disable_markdown_filter: bool
 
-    def __init__(self, logger: Logger, url: str, app_key: str, access_key: str,  resource_id: str):
-        self.__logger = logger
+    def __init__(self, url: str, app_key: str, access_key: str,  resource_id: str):
         self.__url = url
         self.__auth_header = {
             "X-Api-App-Key": app_key,
@@ -599,18 +595,12 @@ class Client:
 
     async def async_open(self) -> 'Client':
         """Establish a WebSocket connection to the server."""
-
-        try:
-            self.__session = ClientSession()
-            self.__conn = await self.__session.ws_connect(self.__url, headers=self.__auth_header)
-            return self
-        except Exception as e:
-            self.__logger.error(f"Establish connection failed: {e}")
-            raise
+        self.__session = ClientSession()
+        self.__conn = await self.__session.ws_connect(self.__url, headers=self.__auth_header)
+        return self
 
     async def async_close(self):
         """Close the WebSocket connection."""
-
         if self.__conn and not self.__conn.closed:
             await self.__conn.close()
         if self.__session and not self.__session.closed:
@@ -620,41 +610,32 @@ class Client:
         """Send request"""
         await self.__conn.send_bytes(message.marshal())
 
-    async def async_recv_response(self, timeout: float = 30) -> 'Response':
+    async def async_recv_response(self, timeout: float = 30) -> Response:
         """Recn response"""
         msg = await self.__conn.receive(timeout)
         if msg.type != WSMsgType.BINARY:
-            raise ValueError(f"Unexpected message type: {msg.type}")
+            raise ValueError(f"Unexpected message type: {msg}")
         return Response(msg.data)
 
     async def async_wait_for_event(self, msg_type: MsgType, event_type: EventType) -> Message:
         """Wait for specific event"""
-
         resp: Response = await self.async_recv_response()
         if resp.type != msg_type or resp.event != event_type:
-            raise ValueError(f"Unexpected message: {resp}")
+            raise ValueError(f"Unexpected response: {resp}")
 
         return resp
 
-    async def async_connect(self):
+    async def async_connect(self) -> Response:
         """Send connect request to server"""
-        self.__logger.info("Connect")
-
         await self.async_send_request(ConnectRequest())
+        return await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.CONNECTION_START)
 
-        resp: Response = await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.CONNECTION_START)
-        self.__logger.info(f"Connect success, response: {resp}")
-
-    async def async_disconnect(self):
+    async def async_disconnect(self) -> Response:
         """Send disconnect request to server"""
-        self.__logger.info("Disconnect")
-
         await self.async_send_request(DisconnectRequest())
+        return await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.CONNECTION_FINISH)
 
-        resp: Response = await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.CONNECTION_FINISH)
-        self.__logger.info(f"Disonnect success, response: {resp}")
-
-    async def async_start_session(self, session_id: str, voice_type: str, encoding: str = "mp3", sample_rate: int = 24000, enable_timestamp: bool = True, disable_markdown_filter: bool = False):
+    async def async_start_session(self, session_id: str, voice_type: str, encoding: str = "mp3", sample_rate: int = 24000, enable_timestamp: bool = True, disable_markdown_filter: bool = False) -> Response:
         """Start session"""
         self.__session_id = session_id
         self.__voice_type = voice_type
@@ -663,35 +644,23 @@ class Client:
         self.__enable_timestamp = enable_timestamp
         self.__disable_markdown_filter = disable_markdown_filter
 
-        self.__logger.info("Start connect")
-
         await self.async_send_request(StartSessionRequest(session_id, voice_type, encoding, sample_rate, enable_timestamp, disable_markdown_filter))
-
-        resp: Response = await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.SESSION_START)
-        self.__logger.info(f"Start session success, response: {resp}")
+        return await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.SESSION_START)
 
     async def async_finish_session(self):
         """Finish session"""
-
-        self.__logger.info("Finish disconnect")
-
         await self.async_send_request(FinishSessionRequest(self.__session_id))
 
     async def async_cancel_session(self):
         """Finish session"""
-
-        self.__logger.info("Cancel disconnect")
-
         await self.async_send_request(CancelSessionRequest(self.__session_id))
 
     async def async_send_task(self, text: bytes):
         """Send task request"""
-
         await self.async_send_request(TaskRequest(self.__session_id, text, self.__voice_type, self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter))
 
     async def async_recv(self, timeout: float = 30) -> AsyncGenerator[Response]:
         """Receive responses from the server and yield them as Response objects until the session finished or an error occurs."""
-
         while True:
             msg = await self.__conn.receive(timeout=timeout)
             if msg.type != WSMsgType.BINARY:

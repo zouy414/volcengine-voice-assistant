@@ -7,7 +7,8 @@ from typing import Any, AsyncGenerator, Mapping
 
 import voluptuous
 from homeassistant.components.tts import (TextToSpeechEntity, TTSAudioRequest,
-                                          TTSAudioResponse, TtsAudioType, Voice)
+                                          TTSAudioResponse, TtsAudioType,
+                                          Voice)
 from homeassistant.config_entries import (ConfigEntry, ConfigSubentryFlow,
                                           SubentryFlowResult)
 from homeassistant.core import HomeAssistant, callback
@@ -37,7 +38,7 @@ async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_a
                 config_subentry_id=subentry.subentry_id
             )
         except Exception as e:
-            LOGGER.error("Setup %s failed: %s", subentry.data["name"], e)
+            LOGGER.exception("Setup %s failed: %s", subentry.data["name"], e)
             raise
 
 
@@ -114,13 +115,13 @@ class SubentryFlow(ConfigSubentryFlow):
 
     async def __is_valid_user_input(self, user_input: dict[str, Any]) -> str:
         try:
-            async with Client(self.__logger, user_input["url"], user_input["app_key"], user_input["access_key"], user_input["resource_id"]) as client:
+            async with Client(user_input["url"], user_input["app_key"], user_input["access_key"], user_input["resource_id"]) as client:
                 await client.async_connect()
                 await client.async_disconnect()
             return None
         except Exception as e:
             del user_input["access_key"]
-            self.__logger.error(
+            self.__logger.exception(
                 f"Invalid user input: {user_input}, error: {e}")
             return f"{e}"
 
@@ -169,19 +170,23 @@ class Provider(TextToSpeechEntity):
         return TTSAudioResponse(self.__encoding,  self.__async_stream_tts_audio(request))
 
     async def __async_stream_tts_audio(self, request: TTSAudioRequest) -> AsyncGenerator[bytes]:
-        async with Client(self.__logger, self.__url, self.__app_key, self.__access_key, self.__resource_id) as client:
-            await client.async_connect()
+        async with Client(self.__url, self.__app_key, self.__access_key, self.__resource_id) as client:
+            resp = await client.async_connect()
+            self.__logger.info(f"Connect successfully, response: {resp}")
+
             try:
-                await client.async_start_session(
+                resp = await client.async_start_session(
                     str(uuid.uuid4()), request.options.get("voice"),
                     self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter)
+                self.__logger.info(
+                    f"Start session successfully, response: {resp}")
 
                 async def sender():
                     try:
                         async for text in request.message_gen:
                             await client.async_send_task(text)
                     except Exception as e:
-                        self.__logger.error(f"sender text failed: {e}")
+                        self.__logger.exception(f"Send text failed: {e}")
                         raise
                     finally:
                         await client.async_finish_session()
@@ -194,7 +199,7 @@ class Provider(TextToSpeechEntity):
                     async for resp in client.async_recv():
                         yield resp.payload
                 except Exception as e:
-                    self.__logger.error(f"Failed to recv audio: {e}")
+                    self.__logger.exception(f"Failed to process request: {e}")
 
                     try:
                         sender_task.cancel()
@@ -202,10 +207,10 @@ class Provider(TextToSpeechEntity):
                         self.__logger.info(
                             "Sender task cancelled successfully")
                     except asyncio.CancelledError:
-                        self.__logger.info("Sender task was already cancelled")
+                        pass
 
                     raise
             except Exception as e:
-                self.__logger.error(f"TSS failed: {e}")
+                self.__logger.exception(f"Text to speech failed: {e}")
             finally:
                 await client.async_disconnect()
