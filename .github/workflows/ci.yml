@@ -21,7 +21,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-          python -m pip install pylint
+          python -m pip install pylint isort
       - name: Lint
         run: |
           python -m pylint $(git ls-files '*.py')
+          python3 -m isort $(git ls-files '*.py')
+          python3 -m autopep8 --diff --aggressive $(git ls-files '*.py')
