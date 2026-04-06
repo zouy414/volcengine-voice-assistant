@@ -1,6 +1,7 @@
 # Volcengine Voice Assistant
 
 [![CI](https://github.com/zouy414/volcengine-voice-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/zouy414/volcengine-voice-assistant/actions/workflows/ci.yml)
+[![Release](https://github.com/zouy414/volcengine-voice-assistant/actions/workflows/release.yml/badge.svg)](https://github.com/zouy414/volcengine-voice-assistant/actions/workflows/release.yml)
 
 A third-party custom component for Home Assistant to integrate Volcengine STT/TTS services.
 
