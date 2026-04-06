@@ -69,11 +69,11 @@
                         "resource_id": "Resource ID"
                     },
                     "description": {
-                        "name": "The name of the STT service",
-                        "url": "The URL of the STT service",
-                        "app_key": "The app key for the STT service",
-                        "access_key": "The access key for the STT service",
-                        "resource_id": "The resource ID for the STT service"
+                        "name": "The name of the TTS service",
+                        "url": "The URL of the TTS service",
+                        "app_key": "The app key for the TTS service",
+                        "access_key": "The access key for the TTS service",
+                        "resource_id": "The resource ID for the TTS service"
                     },
                     "abort": {
                         "already_configured": "Already Configured"
@@ -88,10 +88,10 @@
                         "resource_id": "Resource ID"
                     },
                     "description": {
-                        "url": "The URL of the STT service",
-                        "app_key": "The app key for the STT service",
-                        "access_key": "The access key for the STT service",
-                        "resource_id": "The resource ID for the STT service"
+                        "url": "The URL of the TTS service",
+                        "app_key": "The app key for the TTS service",
+                        "access_key": "The access key for the TTS service",
+                        "resource_id": "The resource ID for the TTS service"
                     }
                 }
             }
