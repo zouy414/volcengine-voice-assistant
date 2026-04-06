@@ -20,7 +20,7 @@ from homeassistant.helpers.selector import (SelectSelector,
                                             SelectSelectorMode)
 
 from . import LOGGER, gen_unique_id
-from .sdk.asr import Client, Stream
+from .sdk.asr import Client
 from .sdk.utils import gen_wav_content
 
 
@@ -213,23 +213,14 @@ class Provider(SpeechToTextEntity):
                 # Start a separate task to send audio segments to the server
                 async def async_sender():
                     try:
-                        # Collect audio content
-                        # NOTE: The segment from stream not include wav header
-                        content: bytes = b""
-                        async for segment in stream:
-                            content += segment
+                        # Send the first segment with wav header,
+                        # Because the segment from stream not include wav
+                        # header
+                        segment = await anext(stream)
+                        await client.async_send_segment(gen_wav_content(metadata.sample_rate, metadata.bit_rate, metadata.channel, segment))
 
-                        # Send audio content
-                        await client.async_send_stream(
-                            Stream(
-                                gen_wav_content(
-                                    metadata.sample_rate, metadata.bit_rate, metadata.channel, content),
-                                metadata.sample_rate,
-                                metadata.bit_rate // 8,
-                                metadata.channel,
-                                self.__segment_duration
-                            )
-                        )
+                        async for segment in stream:
+                            await client.async_send_segment(segment)
                     except Exception as e:
                         self.__logger.exception("Send segment failed: %s", e)
                         raise
