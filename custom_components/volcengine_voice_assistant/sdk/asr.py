@@ -247,7 +247,7 @@ class Response:
         self.message_type_specific_flags = msg[1] & 0x0f
         self.serialization_method = msg[2] >> 4
         self.message_compression = msg[2] & 0x0f
-        self.payload = msg[self.header_size*4:]
+        self.payload = msg[self.header_size * 4:]
 
         # Parse message_type_specific_flags
         if self.message_type_specific_flags & 0x01:
@@ -306,7 +306,8 @@ class Client:
     __conn: ClientWebSocketResponse = None
     __seq: int = 1
 
-    def __init__(self, url: str, app_key: str, access_key: str,  resource_id: str):
+    def __init__(self, url: str, app_key: str,
+                 access_key: str, resource_id: str):
         self.__url = url
         self.__auth_header = {
             "X-Api-App-Key": app_key,
@@ -369,7 +370,8 @@ class Client:
 
     async def async_disconnect(self):
         """Send a request to indicate the end of the stream and close the connection."""
-        # Send a final request with is_last=True to indicate the end of the stream
+        # Send a final request with is_last=True to indicate the end of the
+        # stream
         await self.async_send_request(DisconnectRequest())
 
     async def async_send_segment(self, segment: bytes):
@@ -385,7 +387,8 @@ class Client:
             await asyncio.sleep(stream.segment_duration() / 1000)
             yield
 
-    async def async_send_file(self, file_path: str, segment_duration: int = 200, sample_rate: int = 16000) -> AsyncGenerator[Response]:
+    async def async_send_file(self, file_path: str, segment_duration: int = 200,
+                              sample_rate: int = 16000) -> AsyncGenerator[Response]:
         """Send an audio file for streaming ASR processing."""
 
         if not file_path:
@@ -397,7 +400,8 @@ class Client:
         async for response in self.async_send_stream(stream):
             yield response
 
-    async def async_recv(self, timeout: float = 30) -> AsyncGenerator[Response]:
+    async def async_recv(
+            self, timeout: float = 30) -> AsyncGenerator[Response]:
         """Receive responses from the server and yield them as Response objects until the last package is received or an error occurs."""
         while True:
             msg = await self.__conn.receive(timeout=timeout)

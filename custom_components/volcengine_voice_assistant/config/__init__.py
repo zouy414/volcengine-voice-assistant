@@ -20,36 +20,60 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_male_taocheng_uranus_bigtts", name="小天 2.0"),
             Voice(voice_id="zh_male_liufei_uranus_bigtts", name="刘飞 2.0"),
             Voice(voice_id="zh_male_sophie_uranus_bigtts", name="魅力苏菲 2.0"),
-            Voice(voice_id="zh_female_qingxinnvsheng_uranus_bigtts", name="清新女声 2.0"),
+            Voice(
+                voice_id="zh_female_qingxinnvsheng_uranus_bigtts",
+                name="清新女声 2.0"),
             Voice(voice_id="zh_female_cancan_uranus_bigtts", name="知性灿灿 2.0"),
-            Voice(voice_id="zh_female_sajiaoxuemei_uranus_bigtts", name="撒娇学妹 2.0"),
+            Voice(
+                voice_id="zh_female_sajiaoxuemei_uranus_bigtts",
+                name="撒娇学妹 2.0"),
             Voice(voice_id="zh_female_tianmeixiaoyuan_uranus_bigtts",
                   name="甜美小源 2.0"),
-            Voice(voice_id="zh_female_tianmeitaozi_uranus_bigtts", name="甜美桃子 2.0"),
-            Voice(voice_id="zh_female_shuangkuaisisi_uranus_bigtts", name="爽快思思 2.0"),
+            Voice(
+                voice_id="zh_female_tianmeitaozi_uranus_bigtts",
+                name="甜美桃子 2.0"),
+            Voice(
+                voice_id="zh_female_shuangkuaisisi_uranus_bigtts",
+                name="爽快思思 2.0"),
             Voice(voice_id="zh_female_peiqi_uranus_bigtts", name="佩奇猪 2.0"),
-            Voice(voice_id="zh_female_linjianvhai_uranus_bigtts", name="邻家女孩 2.0"),
+            Voice(
+                voice_id="zh_female_linjianvhai_uranus_bigtts",
+                name="邻家女孩 2.0"),
             Voice(voice_id="zh_male_shaonianzixin_uranus_bigtts",
                   name="少年梓辛/Brayan 2.0"),
             Voice(voice_id="zh_male_sunwukong_uranus_bigtts", name="猴哥 2.0"),
             Voice(voice_id="zh_female_yingyujiaoxue_uranus_bigtts",
                   name="Tina老师 2.0"),
-            Voice(voice_id="zh_female_kefunvsheng_uranus_bigtts", name="暖阳女声 2.0"),
+            Voice(
+                voice_id="zh_female_kefunvsheng_uranus_bigtts",
+                name="暖阳女声 2.0"),
             Voice(voice_id="zh_female_xiaoxue_uranus_bigtts", name="儿童绘本 2.0"),
             Voice(voice_id="zh_male_dayi_uranus_bigtts", name="大壹 2.0"),
-            Voice(voice_id="zh_female_mizai_uranus_bigtts", name="黑猫侦探社咪仔 2.0"),
+            Voice(
+                voice_id="zh_female_mizai_uranus_bigtts",
+                name="黑猫侦探社咪仔 2.0"),
             Voice(voice_id="zh_female_jitangnv_uranus_bigtts", name="鸡汤女 2.0"),
-            Voice(voice_id="zh_female_meilinvyou_uranus_bigtts", name="魅力女友 2.0"),
-            Voice(voice_id="zh_female_liuchangnv_uranus_bigtts", name="流畅女声 2.0"),
+            Voice(
+                voice_id="zh_female_meilinvyou_uranus_bigtts",
+                name="魅力女友 2.0"),
+            Voice(
+                voice_id="zh_female_liuchangnv_uranus_bigtts",
+                name="流畅女声 2.0"),
             Voice(voice_id="zh_male_ruyayichen_uranus_bigtts", name="儒雅逸辰 2.0"),
             Voice(voice_id="saturn_zh_female_keainvsheng_tob", name="可爱女生"),
             Voice(voice_id="saturn_zh_female_tiaopigongzhu_tob", name="调皮公主"),
             Voice(voice_id="saturn_zh_male_shuanglangshaonian_tob", name="爽朗少年"),
             Voice(voice_id="saturn_zh_male_tiancaitongzhuo_tob", name="天才同桌"),
             Voice(voice_id="saturn_zh_female_cancan_tob", name="知性灿灿"),
-            Voice(voice_id="saturn_zh_female_qingyingduoduo_cs_tob", name="轻盈朵朵 2.0"),
-            Voice(voice_id="saturn_zh_female_wenwanshanshan_cs_tob", name="温婉珊珊 2.0"),
-            Voice(voice_id="saturn_zh_female_reqingaina_cs_tob", name="热情艾娜 2.0")
+            Voice(
+                voice_id="saturn_zh_female_qingyingduoduo_cs_tob",
+                name="轻盈朵朵 2.0"),
+            Voice(
+                voice_id="saturn_zh_female_wenwanshanshan_cs_tob",
+                name="温婉珊珊 2.0"),
+            Voice(
+                voice_id="saturn_zh_female_reqingaina_cs_tob",
+                name="热情艾娜 2.0")
         },
         "en-US": {
             Voice(voice_id="en_male_tim_uranus_bigtts", name="Tim"),
@@ -104,21 +128,27 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
                   name="爽快思思（多情感）"),
             Voice(voice_id="中文", name="zh_male_shenyeboke_emo_v2_mars_bigtts"),
             Voice(voice_id="zh_female_yingyujiaoyu_mars_bigtts", name="Tina老师"),
-            Voice(voice_id="ICL_zh_female_wenrounvshen_239eff5e8ffa_tob", name="温柔女神"),
+            Voice(
+                voice_id="ICL_zh_female_wenrounvshen_239eff5e8ffa_tob",
+                name="温柔女神"),
             Voice(voice_id="zh_female_vv_mars_bigtts", name="Vivi"),
             Voice(voice_id="zh_female_qinqienvsheng_moon_bigtts", name="亲切女声"),
             Voice(voice_id="ICL_zh_male_shenmi_v1_tob", name="机灵小伙"),
             Voice(voice_id="ICL_zh_female_wuxi_tob", name="元气甜妹"),
             Voice(voice_id="ICL_zh_female_wenyinvsheng_v1_tob", name="知心姐姐"),
             Voice(voice_id="zh_male_qingyiyuxuan_mars_bigtts", name="阳光阿辰"),
-            Voice(voice_id="zh_male_xudong_conversation_wvae_bigtts", name="快乐小东"),
+            Voice(
+                voice_id="zh_male_xudong_conversation_wvae_bigtts",
+                name="快乐小东"),
             Voice(voice_id="ICL_zh_male_lengkugege_v1_tob", name="冷酷哥哥"),
             Voice(voice_id="ICL_zh_female_feicui_v1_tob", name="纯澈女生"),
             Voice(voice_id="ICL_zh_female_yuxin_v1_tob", name="初恋女友"),
             Voice(voice_id="ICL_zh_female_xnx_tob", name="贴心闺蜜"),
             Voice(voice_id="ICL_zh_female_yry_tob", name="温柔白月光"),
             Voice(voice_id="ICL_zh_male_BV705_streaming_cs_tob", name="炀炀"),
-            Voice(voice_id="zh_female_sophie_conversation_wvae_bigtts", name="魅力苏菲"),
+            Voice(
+                voice_id="zh_female_sophie_conversation_wvae_bigtts",
+                name="魅力苏菲"),
             Voice(voice_id="ICL_zh_female_yilin_tob", name="贴心妹妹"),
             Voice(voice_id="zh_female_tianmeitaozi_mars_bigtts", name="甜美桃子"),
             Voice(voice_id="zh_female_qingxinnvsheng_mars_bigtts", name="清新女声"),
@@ -141,9 +171,15 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="ICL_zh_male_shuaizhenxiaohuo_tob", name="率真小伙"),
             Voice(voice_id="zh_male_wenrouxiaoge_mars_bigtts", name="温柔小哥"),
             Voice(voice_id="zh_female_cancan_mars_bigtts", name="灿灿/Shiny"),
-            Voice(voice_id="zh_female_shuangkuaisisi_moon_bigtts", name="爽快思思/Skye"),
-            Voice(voice_id="zh_male_wennuanahu_moon_bigtts", name="温暖阿虎/Alvin"),
-            Voice(voice_id="zh_male_shaonianzixin_moon_bigtts", name="少年梓辛/Brayan"),
+            Voice(
+                voice_id="zh_female_shuangkuaisisi_moon_bigtts",
+                name="爽快思思/Skye"),
+            Voice(
+                voice_id="zh_male_wennuanahu_moon_bigtts",
+                name="温暖阿虎/Alvin"),
+            Voice(
+                voice_id="zh_male_shaonianzixin_moon_bigtts",
+                name="少年梓辛/Brayan"),
             Voice(voice_id="ICL_zh_female_wenrouwenya_tob", name="温柔文雅"),
             Voice(voice_id="仅中文豆包", name="zh_male_hupunan_mars_bigtts"),
             Voice(voice_id="zh_male_lubanqihao_mars_bigtts", name="鲁班七号"),
@@ -160,7 +196,9 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_male_yuzhouzixuan_moon_bigtts", name="豫州子轩"),
             Voice(voice_id="zh_female_daimengchuanmei_moon_bigtts", name="呆萌川妹"),
             Voice(voice_id="zh_male_guangxiyuanzhou_moon_bigtts", name="广西远舟"),
-            Voice(voice_id="zh_male_zhoujielun_emo_v2_mars_bigtts", name="双节棍小哥"),
+            Voice(
+                voice_id="zh_male_zhoujielun_emo_v2_mars_bigtts",
+                name="双节棍小哥"),
             Voice(voice_id="zh_female_wanwanxiaohe_moon_bigtts", name="湾湾小何"),
             Voice(voice_id="zh_female_wanqudashu_moon_bigtts", name="湾区大叔"),
             Voice(voice_id="zh_male_guozhoudege_moon_bigtts", name="广州德哥"),
@@ -169,12 +207,20 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_male_jingqiangkanye_moon_bigtts",
                   name="京腔侃爷/Harmony"),
             Voice(voice_id="zh_female_meituojieer_moon_bigtts", name="妹坨洁儿"),
-            Voice(voice_id="ICL_zh_female_chunzhenshaonv_e588402fb8ad_tob", name="纯真少女"),
-            Voice(voice_id="ICL_zh_male_xiaonaigou_edf58cf28b8b_tob", name="奶气小生"),
+            Voice(
+                voice_id="ICL_zh_female_chunzhenshaonv_e588402fb8ad_tob",
+                name="纯真少女"),
+            Voice(
+                voice_id="ICL_zh_male_xiaonaigou_edf58cf28b8b_tob",
+                name="奶气小生"),
             Voice(
                 voice_id="ICL_zh_female_jinglingxiangdao_1beb294a9e3e_tob", name="精灵向导"),
-            Voice(voice_id="ICL_zh_male_menyoupingxiaoge_ffed9fc2fee7_tob", name="闷油瓶小哥"),
-            Voice(voice_id="ICL_zh_male_anrenqinzhu_cd62e63dcdab_tob", name="黯刃秦主"),
+            Voice(
+                voice_id="ICL_zh_male_menyoupingxiaoge_ffed9fc2fee7_tob",
+                name="闷油瓶小哥"),
+            Voice(
+                voice_id="ICL_zh_male_anrenqinzhu_cd62e63dcdab_tob",
+                name="黯刃秦主"),
             Voice(voice_id="ICL_zh_male_badaozongcai_v1_tob", name="霸道总裁"),
             Voice(voice_id="ICL_zh_female_ganli_v1_tob", name="妩媚可人"),
             Voice(voice_id="ICL_zh_female_xiangliangya_v1_tob", name="邪魅御姐"),
@@ -321,10 +367,18 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="ICL_zh_male_aomanshaoye_tob", name="傲慢少爷"),
             Voice(voice_id="ICL_zh_male_aiqilingren_tob", name="傲气凌人"),
             Voice(voice_id="ICL_zh_male_bingjiaobailian_tob", name="病娇白莲"),
-            Voice(voice_id="zh_male_M100_conversation_wvae_bigtts", name="Lucas"),
-            Voice(voice_id="zh_female_sophie_conversation_wvae_bigtts", name="Sophie"),
-            Voice(voice_id="zh_male_xudong_conversation_wvae_bigtts", name="Daniel"),
-            Voice(voice_id="multi_zh_male_youyoujunzi_moon_bigtts", name="ひかる（光）"),
+            Voice(
+                voice_id="zh_male_M100_conversation_wvae_bigtts",
+                name="Lucas"),
+            Voice(
+                voice_id="zh_female_sophie_conversation_wvae_bigtts",
+                name="Sophie"),
+            Voice(
+                voice_id="zh_male_xudong_conversation_wvae_bigtts",
+                name="Daniel"),
+            Voice(
+                voice_id="multi_zh_male_youyoujunzi_moon_bigtts",
+                name="ひかる（光）"),
             Voice(voice_id="ICL_zh_female_lixingyuanzi_cs_tob", name="理性圆子"),
             Voice(voice_id="ICL_zh_female_qingtiantaotao_cs_tob", name="清甜桃桃"),
             Voice(voice_id="ICL_zh_female_qingxixiaoxue_cs_tob", name="清晰小雪"),
@@ -350,7 +404,9 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="ICL_zh_female_qingyingduoduo_cs_tob", name="轻盈朵朵"),
             Voice(voice_id="zh_female_kefunvsheng_mars_bigtts", name="暖阳女声"),
             Voice(voice_id="zh_male_M100_conversation_wvae_bigtts", name="悠悠君子"),
-            Voice(voice_id="zh_female_maomao_conversation_wvae_bigtts", name="文静毛毛"),
+            Voice(
+                voice_id="zh_female_maomao_conversation_wvae_bigtts",
+                name="文静毛毛"),
             Voice(voice_id="ICL_zh_female_qiuling_v1_tob", name="倾心少女"),
             Voice(voice_id="ICL_zh_male_buyan_v1_tob", name="醇厚低音"),
             Voice(voice_id="ICL_zh_male_BV144_paoxiaoge_v1_tob", name="咆哮小哥"),
@@ -372,10 +428,18 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_male_dongmanhaimian_mars_bigtts", name="亮嗓萌仔"),
             Voice(voice_id="zh_male_jieshuonansheng_mars_bigtts",
                   name="磁性解说男声/Morgan"),
-            Voice(voice_id="zh_female_jitangmeimei_mars_bigtts", name="鸡汤妹妹/Hope"),
-            Voice(voice_id="zh_female_tiexinnvsheng_mars_bigtts", name="贴心女声/Candy"),
-            Voice(voice_id="zh_female_mengyatou_mars_bigtts", name="萌丫头/Cutey"),
-            Voice(voice_id="ICL_zh_male_neiliancaijun_e991be511569_tob", name="内敛才俊"),
+            Voice(
+                voice_id="zh_female_jitangmeimei_mars_bigtts",
+                name="鸡汤妹妹/Hope"),
+            Voice(
+                voice_id="zh_female_tiexinnvsheng_mars_bigtts",
+                name="贴心女声/Candy"),
+            Voice(
+                voice_id="zh_female_mengyatou_mars_bigtts",
+                name="萌丫头/Cutey"),
+            Voice(
+                voice_id="ICL_zh_male_neiliancaijun_e991be511569_tob",
+                name="内敛才俊"),
             Voice(voice_id="ICL_zh_male_yangyang_v1_tob", name="温暖少年"),
             Voice(voice_id="ICL_zh_male_flc_v1_tob", name="儒雅公子"),
             Voice(voice_id="zh_male_changtianyi_mars_bigtts", name="悬疑解说"),
@@ -388,14 +452,22 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_male_fanjuanqingnian_mars_bigtts", name="反卷青年")
         },
         "en-US": {
-            Voice(voice_id="en_female_candice_emo_v2_mars_bigtts", name="Candice"),
+            Voice(
+                voice_id="en_female_candice_emo_v2_mars_bigtts",
+                name="Candice"),
             Voice(voice_id="en_female_skye_emo_v2_mars_bigtts", name="Serena"),
             Voice(voice_id="en_male_glen_emo_v2_mars_bigtts", name="Glen"),
             Voice(voice_id="en_male_sylus_emo_v2_mars_bigtts", name="Sylus"),
             Voice(voice_id="zh_female_cancan_mars_bigtts", name="灿灿/Shiny"),
-            Voice(voice_id="zh_female_shuangkuaisisi_moon_bigtts", name="爽快思思/Skye"),
-            Voice(voice_id="zh_male_wennuanahu_moon_bigtts", name="温暖阿虎/Alvin"),
-            Voice(voice_id="zh_male_shaonianzixin_moon_bigtts", name="少年梓辛/Brayan"),
+            Voice(
+                voice_id="zh_female_shuangkuaisisi_moon_bigtts",
+                name="爽快思思/Skye"),
+            Voice(
+                voice_id="zh_male_wennuanahu_moon_bigtts",
+                name="温暖阿虎/Alvin"),
+            Voice(
+                voice_id="zh_male_shaonianzixin_moon_bigtts",
+                name="少年梓辛/Brayan"),
             Voice(voice_id="zh_male_jingqiangkanye_moon_bigtts",
                   name="京腔侃爷/Harmony"),
             Voice(voice_id="en_female_lauren_moon_bigtts", name="Lauren"),
@@ -410,11 +482,21 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="en_male_bruce_moon_bigtts", name="Bruce"),
             Voice(voice_id="en_male_michael_moon_bigtts", name="Michael"),
             Voice(voice_id="ICL_en_male_cc_sha_v1_tob", name="CartoonChef"),
-            Voice(voice_id="zh_male_M100_conversation_wvae_bigtts", name="Lucas"),
-            Voice(voice_id="zh_female_sophie_conversation_wvae_bigtts", name="Sophie"),
-            Voice(voice_id="en_female_dacey_conversation_wvae_bigtts", name="Daisy"),
-            Voice(voice_id="en_male_charlie_conversation_wvae_bigtts", name="Owen"),
-            Voice(voice_id="en_female_sarah_new_conversation_wvae_bigtts", name="Luna"),
+            Voice(
+                voice_id="zh_male_M100_conversation_wvae_bigtts",
+                name="Lucas"),
+            Voice(
+                voice_id="zh_female_sophie_conversation_wvae_bigtts",
+                name="Sophie"),
+            Voice(
+                voice_id="en_female_dacey_conversation_wvae_bigtts",
+                name="Daisy"),
+            Voice(
+                voice_id="en_male_charlie_conversation_wvae_bigtts",
+                name="Owen"),
+            Voice(
+                voice_id="en_female_sarah_new_conversation_wvae_bigtts",
+                name="Luna"),
             Voice(voice_id="ICL_en_male_michael_tob", name="Michael"),
             Voice(voice_id="ICL_en_female_cc_cm_v1_tob", name="Charlie"),
             Voice(voice_id="ICL_en_male_oogie2_tob", name="BigBoogie"),
@@ -432,34 +514,48 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="en_male_jackson_mars_bigtts", name="Jackson"),
             Voice(voice_id="zh_male_jieshuonansheng_mars_bigtts",
                   name="磁性解说男声/Morgan"),
-            Voice(voice_id="zh_female_jitangmeimei_mars_bigtts", name="鸡汤妹妹/Hope"),
-            Voice(voice_id="zh_female_tiexinnvsheng_mars_bigtts", name="贴心女声/Candy"),
+            Voice(
+                voice_id="zh_female_jitangmeimei_mars_bigtts",
+                name="鸡汤妹妹/Hope"),
+            Voice(
+                voice_id="zh_female_tiexinnvsheng_mars_bigtts",
+                name="贴心女声/Candy"),
             Voice(voice_id="zh_female_mengyatou_mars_bigtts", name="萌丫头/Cutey")
         },
         "en-GB": {
             Voice(voice_id="zh_female_shuangkuaisisi_emo_v2_mars_bigtts",
                   name="爽快思思（多情感）"),
             Voice(voice_id="en_male_corey_emo_v2_mars_bigtts", name="Corey"),
-            Voice(voice_id="en_female_nadia_tips_emo_v2_mars_bigtts", name="Nadia"),
+            Voice(
+                voice_id="en_female_nadia_tips_emo_v2_mars_bigtts",
+                name="Nadia"),
             Voice(voice_id="zh_female_yingyujiaoyu_mars_bigtts", name="Tina老师"),
             Voice(voice_id="en_female_daisy_moon_bigtts", name="DelicateGirl"),
             Voice(voice_id="en_male_dave_moon_bigtts", name="Dave"),
             Voice(voice_id="en_male_hades_moon_bigtts", name="Hades"),
             Voice(voice_id="en_female_onez_moon_bigtts", name="Onez"),
             Voice(voice_id="en_female_emily_mars_bigtts", name="Emily"),
-            Voice(voice_id="zh_male_xudong_conversation_wvae_bigtts", name="Daniel"),
+            Voice(
+                voice_id="zh_male_xudong_conversation_wvae_bigtts",
+                name="Daniel"),
             Voice(voice_id="ICL_en_male_cc_alastor_tob", name="Alastor"),
             Voice(voice_id="en_male_smith_mars_bigtts", name="Smith"),
             Voice(voice_id="en_female_anna_mars_bigtts", name="Anna")
         },
         "ja-JP": {
-            Voice(voice_id="multi_zh_male_youyoujunzi_moon_bigtts", name="ひかる（光）"),
+            Voice(
+                voice_id="multi_zh_male_youyoujunzi_moon_bigtts",
+                name="ひかる（光）"),
             Voice(voice_id="multi_female_sophie_conversation_wvae_bigtts",
                   name="さとみ（智美）"),
             Voice(voice_id="multi_male_xudong_conversation_wvae_bigtts",
                   name="まさお（正男）"),
-            Voice(voice_id="multi_female_maomao_conversation_wvae_bigtts", name="つき（月）"),
-            Voice(voice_id="multi_female_gaolengyujie_moon_bigtts", name="あけみ（朱美）"),
+            Voice(
+                voice_id="multi_female_maomao_conversation_wvae_bigtts",
+                name="つき（月）"),
+            Voice(
+                voice_id="multi_female_gaolengyujie_moon_bigtts",
+                name="あけみ（朱美）"),
             Voice(voice_id="multi_male_jingqiangkanye_moon_bigtts",
                   name="かずね（和音）/JavierorÁlvaro"),
             Voice(voice_id="multi_female_shuangkuaisisi_moon_bigtts",
@@ -468,9 +564,15 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
                   name="ひろし（広志）/Roberto")
         },
         "es-MX": {
-            Voice(voice_id="multi_female_maomao_conversation_wvae_bigtts", name="Diana"),
-            Voice(voice_id="multi_male_M100_conversation_wvae_bigtts", name="Lucía"),
-            Voice(voice_id="multi_female_sophie_conversation_wvae_bigtts", name="Sofía"),
+            Voice(
+                voice_id="multi_female_maomao_conversation_wvae_bigtts",
+                name="Diana"),
+            Voice(
+                voice_id="multi_male_M100_conversation_wvae_bigtts",
+                name="Lucía"),
+            Voice(
+                voice_id="multi_female_sophie_conversation_wvae_bigtts",
+                name="Sofía"),
             Voice(voice_id="multi_male_xudong_conversation_wvae_bigtts",
                   name="Daníel"),
             Voice(voice_id="multi_male_jingqiangkanye_moon_bigtts",
@@ -515,21 +617,27 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
                   name="爽快思思（多情感）"),
             Voice(voice_id="中文", name="zh_male_shenyeboke_emo_v2_mars_bigtts"),
             Voice(voice_id="zh_female_yingyujiaoyu_mars_bigtts", name="Tina老师"),
-            Voice(voice_id="ICL_zh_female_wenrounvshen_239eff5e8ffa_tob", name="温柔女神"),
+            Voice(
+                voice_id="ICL_zh_female_wenrounvshen_239eff5e8ffa_tob",
+                name="温柔女神"),
             Voice(voice_id="zh_female_vv_mars_bigtts", name="Vivi"),
             Voice(voice_id="zh_female_qinqienvsheng_moon_bigtts", name="亲切女声"),
             Voice(voice_id="ICL_zh_male_shenmi_v1_tob", name="机灵小伙"),
             Voice(voice_id="ICL_zh_female_wuxi_tob", name="元气甜妹"),
             Voice(voice_id="ICL_zh_female_wenyinvsheng_v1_tob", name="知心姐姐"),
             Voice(voice_id="zh_male_qingyiyuxuan_mars_bigtts", name="阳光阿辰"),
-            Voice(voice_id="zh_male_xudong_conversation_wvae_bigtts", name="快乐小东"),
+            Voice(
+                voice_id="zh_male_xudong_conversation_wvae_bigtts",
+                name="快乐小东"),
             Voice(voice_id="ICL_zh_male_lengkugege_v1_tob", name="冷酷哥哥"),
             Voice(voice_id="ICL_zh_female_feicui_v1_tob", name="纯澈女生"),
             Voice(voice_id="ICL_zh_female_yuxin_v1_tob", name="初恋女友"),
             Voice(voice_id="ICL_zh_female_xnx_tob", name="贴心闺蜜"),
             Voice(voice_id="ICL_zh_female_yry_tob", name="温柔白月光"),
             Voice(voice_id="ICL_zh_male_BV705_streaming_cs_tob", name="炀炀"),
-            Voice(voice_id="zh_female_sophie_conversation_wvae_bigtts", name="魅力苏菲"),
+            Voice(
+                voice_id="zh_female_sophie_conversation_wvae_bigtts",
+                name="魅力苏菲"),
             Voice(voice_id="ICL_zh_female_yilin_tob", name="贴心妹妹"),
             Voice(voice_id="zh_female_tianmeitaozi_mars_bigtts", name="甜美桃子"),
             Voice(voice_id="zh_female_qingxinnvsheng_mars_bigtts", name="清新女声"),
@@ -552,9 +660,15 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="ICL_zh_male_shuaizhenxiaohuo_tob", name="率真小伙"),
             Voice(voice_id="zh_male_wenrouxiaoge_mars_bigtts", name="温柔小哥"),
             Voice(voice_id="zh_female_cancan_mars_bigtts", name="灿灿/Shiny"),
-            Voice(voice_id="zh_female_shuangkuaisisi_moon_bigtts", name="爽快思思/Skye"),
-            Voice(voice_id="zh_male_wennuanahu_moon_bigtts", name="温暖阿虎/Alvin"),
-            Voice(voice_id="zh_male_shaonianzixin_moon_bigtts", name="少年梓辛/Brayan"),
+            Voice(
+                voice_id="zh_female_shuangkuaisisi_moon_bigtts",
+                name="爽快思思/Skye"),
+            Voice(
+                voice_id="zh_male_wennuanahu_moon_bigtts",
+                name="温暖阿虎/Alvin"),
+            Voice(
+                voice_id="zh_male_shaonianzixin_moon_bigtts",
+                name="少年梓辛/Brayan"),
             Voice(voice_id="ICL_zh_female_wenrouwenya_tob", name="温柔文雅"),
             Voice(voice_id="仅中文豆包", name="zh_male_hupunan_mars_bigtts"),
             Voice(voice_id="zh_male_lubanqihao_mars_bigtts", name="鲁班七号"),
@@ -571,7 +685,9 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_male_yuzhouzixuan_moon_bigtts", name="豫州子轩"),
             Voice(voice_id="zh_female_daimengchuanmei_moon_bigtts", name="呆萌川妹"),
             Voice(voice_id="zh_male_guangxiyuanzhou_moon_bigtts", name="广西远舟"),
-            Voice(voice_id="zh_male_zhoujielun_emo_v2_mars_bigtts", name="双节棍小哥"),
+            Voice(
+                voice_id="zh_male_zhoujielun_emo_v2_mars_bigtts",
+                name="双节棍小哥"),
             Voice(voice_id="zh_female_wanwanxiaohe_moon_bigtts", name="湾湾小何"),
             Voice(voice_id="zh_female_wanqudashu_moon_bigtts", name="湾区大叔"),
             Voice(voice_id="zh_male_guozhoudege_moon_bigtts", name="广州德哥"),
@@ -580,12 +696,20 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_male_jingqiangkanye_moon_bigtts",
                   name="京腔侃爷/Harmony"),
             Voice(voice_id="zh_female_meituojieer_moon_bigtts", name="妹坨洁儿"),
-            Voice(voice_id="ICL_zh_female_chunzhenshaonv_e588402fb8ad_tob", name="纯真少女"),
-            Voice(voice_id="ICL_zh_male_xiaonaigou_edf58cf28b8b_tob", name="奶气小生"),
+            Voice(
+                voice_id="ICL_zh_female_chunzhenshaonv_e588402fb8ad_tob",
+                name="纯真少女"),
+            Voice(
+                voice_id="ICL_zh_male_xiaonaigou_edf58cf28b8b_tob",
+                name="奶气小生"),
             Voice(
                 voice_id="ICL_zh_female_jinglingxiangdao_1beb294a9e3e_tob", name="精灵向导"),
-            Voice(voice_id="ICL_zh_male_menyoupingxiaoge_ffed9fc2fee7_tob", name="闷油瓶小哥"),
-            Voice(voice_id="ICL_zh_male_anrenqinzhu_cd62e63dcdab_tob", name="黯刃秦主"),
+            Voice(
+                voice_id="ICL_zh_male_menyoupingxiaoge_ffed9fc2fee7_tob",
+                name="闷油瓶小哥"),
+            Voice(
+                voice_id="ICL_zh_male_anrenqinzhu_cd62e63dcdab_tob",
+                name="黯刃秦主"),
             Voice(voice_id="ICL_zh_male_badaozongcai_v1_tob", name="霸道总裁"),
             Voice(voice_id="ICL_zh_female_ganli_v1_tob", name="妩媚可人"),
             Voice(voice_id="ICL_zh_female_xiangliangya_v1_tob", name="邪魅御姐"),
@@ -732,10 +856,18 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="ICL_zh_male_aomanshaoye_tob", name="傲慢少爷"),
             Voice(voice_id="ICL_zh_male_aiqilingren_tob", name="傲气凌人"),
             Voice(voice_id="ICL_zh_male_bingjiaobailian_tob", name="病娇白莲"),
-            Voice(voice_id="zh_male_M100_conversation_wvae_bigtts", name="Lucas"),
-            Voice(voice_id="zh_female_sophie_conversation_wvae_bigtts", name="Sophie"),
-            Voice(voice_id="zh_male_xudong_conversation_wvae_bigtts", name="Daniel"),
-            Voice(voice_id="multi_zh_male_youyoujunzi_moon_bigtts", name="ひかる（光）"),
+            Voice(
+                voice_id="zh_male_M100_conversation_wvae_bigtts",
+                name="Lucas"),
+            Voice(
+                voice_id="zh_female_sophie_conversation_wvae_bigtts",
+                name="Sophie"),
+            Voice(
+                voice_id="zh_male_xudong_conversation_wvae_bigtts",
+                name="Daniel"),
+            Voice(
+                voice_id="multi_zh_male_youyoujunzi_moon_bigtts",
+                name="ひかる（光）"),
             Voice(voice_id="ICL_zh_female_lixingyuanzi_cs_tob", name="理性圆子"),
             Voice(voice_id="ICL_zh_female_qingtiantaotao_cs_tob", name="清甜桃桃"),
             Voice(voice_id="ICL_zh_female_qingxixiaoxue_cs_tob", name="清晰小雪"),
@@ -761,7 +893,9 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="ICL_zh_female_qingyingduoduo_cs_tob", name="轻盈朵朵"),
             Voice(voice_id="zh_female_kefunvsheng_mars_bigtts", name="暖阳女声"),
             Voice(voice_id="zh_male_M100_conversation_wvae_bigtts", name="悠悠君子"),
-            Voice(voice_id="zh_female_maomao_conversation_wvae_bigtts", name="文静毛毛"),
+            Voice(
+                voice_id="zh_female_maomao_conversation_wvae_bigtts",
+                name="文静毛毛"),
             Voice(voice_id="ICL_zh_female_qiuling_v1_tob", name="倾心少女"),
             Voice(voice_id="ICL_zh_male_buyan_v1_tob", name="醇厚低音"),
             Voice(voice_id="ICL_zh_male_BV144_paoxiaoge_v1_tob", name="咆哮小哥"),
@@ -783,10 +917,18 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_male_dongmanhaimian_mars_bigtts", name="亮嗓萌仔"),
             Voice(voice_id="zh_male_jieshuonansheng_mars_bigtts",
                   name="磁性解说男声/Morgan"),
-            Voice(voice_id="zh_female_jitangmeimei_mars_bigtts", name="鸡汤妹妹/Hope"),
-            Voice(voice_id="zh_female_tiexinnvsheng_mars_bigtts", name="贴心女声/Candy"),
-            Voice(voice_id="zh_female_mengyatou_mars_bigtts", name="萌丫头/Cutey"),
-            Voice(voice_id="ICL_zh_male_neiliancaijun_e991be511569_tob", name="内敛才俊"),
+            Voice(
+                voice_id="zh_female_jitangmeimei_mars_bigtts",
+                name="鸡汤妹妹/Hope"),
+            Voice(
+                voice_id="zh_female_tiexinnvsheng_mars_bigtts",
+                name="贴心女声/Candy"),
+            Voice(
+                voice_id="zh_female_mengyatou_mars_bigtts",
+                name="萌丫头/Cutey"),
+            Voice(
+                voice_id="ICL_zh_male_neiliancaijun_e991be511569_tob",
+                name="内敛才俊"),
             Voice(voice_id="ICL_zh_male_yangyang_v1_tob", name="温暖少年"),
             Voice(voice_id="ICL_zh_male_flc_v1_tob", name="儒雅公子"),
             Voice(voice_id="zh_male_changtianyi_mars_bigtts", name="悬疑解说"),
@@ -799,14 +941,22 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_male_fanjuanqingnian_mars_bigtts", name="反卷青年")
         },
         "en-US": {
-            Voice(voice_id="en_female_candice_emo_v2_mars_bigtts", name="Candice"),
+            Voice(
+                voice_id="en_female_candice_emo_v2_mars_bigtts",
+                name="Candice"),
             Voice(voice_id="en_female_skye_emo_v2_mars_bigtts", name="Serena"),
             Voice(voice_id="en_male_glen_emo_v2_mars_bigtts", name="Glen"),
             Voice(voice_id="en_male_sylus_emo_v2_mars_bigtts", name="Sylus"),
             Voice(voice_id="zh_female_cancan_mars_bigtts", name="灿灿/Shiny"),
-            Voice(voice_id="zh_female_shuangkuaisisi_moon_bigtts", name="爽快思思/Skye"),
-            Voice(voice_id="zh_male_wennuanahu_moon_bigtts", name="温暖阿虎/Alvin"),
-            Voice(voice_id="zh_male_shaonianzixin_moon_bigtts", name="少年梓辛/Brayan"),
+            Voice(
+                voice_id="zh_female_shuangkuaisisi_moon_bigtts",
+                name="爽快思思/Skye"),
+            Voice(
+                voice_id="zh_male_wennuanahu_moon_bigtts",
+                name="温暖阿虎/Alvin"),
+            Voice(
+                voice_id="zh_male_shaonianzixin_moon_bigtts",
+                name="少年梓辛/Brayan"),
             Voice(voice_id="zh_male_jingqiangkanye_moon_bigtts",
                   name="京腔侃爷/Harmony"),
             Voice(voice_id="en_female_lauren_moon_bigtts", name="Lauren"),
@@ -821,11 +971,21 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="en_male_bruce_moon_bigtts", name="Bruce"),
             Voice(voice_id="en_male_michael_moon_bigtts", name="Michael"),
             Voice(voice_id="ICL_en_male_cc_sha_v1_tob", name="CartoonChef"),
-            Voice(voice_id="zh_male_M100_conversation_wvae_bigtts", name="Lucas"),
-            Voice(voice_id="zh_female_sophie_conversation_wvae_bigtts", name="Sophie"),
-            Voice(voice_id="en_female_dacey_conversation_wvae_bigtts", name="Daisy"),
-            Voice(voice_id="en_male_charlie_conversation_wvae_bigtts", name="Owen"),
-            Voice(voice_id="en_female_sarah_new_conversation_wvae_bigtts", name="Luna"),
+            Voice(
+                voice_id="zh_male_M100_conversation_wvae_bigtts",
+                name="Lucas"),
+            Voice(
+                voice_id="zh_female_sophie_conversation_wvae_bigtts",
+                name="Sophie"),
+            Voice(
+                voice_id="en_female_dacey_conversation_wvae_bigtts",
+                name="Daisy"),
+            Voice(
+                voice_id="en_male_charlie_conversation_wvae_bigtts",
+                name="Owen"),
+            Voice(
+                voice_id="en_female_sarah_new_conversation_wvae_bigtts",
+                name="Luna"),
             Voice(voice_id="ICL_en_male_michael_tob", name="Michael"),
             Voice(voice_id="ICL_en_female_cc_cm_v1_tob", name="Charlie"),
             Voice(voice_id="ICL_en_male_oogie2_tob", name="BigBoogie"),
@@ -843,34 +1003,48 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="en_male_jackson_mars_bigtts", name="Jackson"),
             Voice(voice_id="zh_male_jieshuonansheng_mars_bigtts",
                   name="磁性解说男声/Morgan"),
-            Voice(voice_id="zh_female_jitangmeimei_mars_bigtts", name="鸡汤妹妹/Hope"),
-            Voice(voice_id="zh_female_tiexinnvsheng_mars_bigtts", name="贴心女声/Candy"),
+            Voice(
+                voice_id="zh_female_jitangmeimei_mars_bigtts",
+                name="鸡汤妹妹/Hope"),
+            Voice(
+                voice_id="zh_female_tiexinnvsheng_mars_bigtts",
+                name="贴心女声/Candy"),
             Voice(voice_id="zh_female_mengyatou_mars_bigtts", name="萌丫头/Cutey")
         },
         "en-GB": {
             Voice(voice_id="zh_female_shuangkuaisisi_emo_v2_mars_bigtts",
                   name="爽快思思（多情感）"),
             Voice(voice_id="en_male_corey_emo_v2_mars_bigtts", name="Corey"),
-            Voice(voice_id="en_female_nadia_tips_emo_v2_mars_bigtts", name="Nadia"),
+            Voice(
+                voice_id="en_female_nadia_tips_emo_v2_mars_bigtts",
+                name="Nadia"),
             Voice(voice_id="zh_female_yingyujiaoyu_mars_bigtts", name="Tina老师"),
             Voice(voice_id="en_female_daisy_moon_bigtts", name="DelicateGirl"),
             Voice(voice_id="en_male_dave_moon_bigtts", name="Dave"),
             Voice(voice_id="en_male_hades_moon_bigtts", name="Hades"),
             Voice(voice_id="en_female_onez_moon_bigtts", name="Onez"),
             Voice(voice_id="en_female_emily_mars_bigtts", name="Emily"),
-            Voice(voice_id="zh_male_xudong_conversation_wvae_bigtts", name="Daniel"),
+            Voice(
+                voice_id="zh_male_xudong_conversation_wvae_bigtts",
+                name="Daniel"),
             Voice(voice_id="ICL_en_male_cc_alastor_tob", name="Alastor"),
             Voice(voice_id="en_male_smith_mars_bigtts", name="Smith"),
             Voice(voice_id="en_female_anna_mars_bigtts", name="Anna")
         },
         "ja-JP": {
-            Voice(voice_id="multi_zh_male_youyoujunzi_moon_bigtts", name="ひかる（光）"),
+            Voice(
+                voice_id="multi_zh_male_youyoujunzi_moon_bigtts",
+                name="ひかる（光）"),
             Voice(voice_id="multi_female_sophie_conversation_wvae_bigtts",
                   name="さとみ（智美）"),
             Voice(voice_id="multi_male_xudong_conversation_wvae_bigtts",
                   name="まさお（正男）"),
-            Voice(voice_id="multi_female_maomao_conversation_wvae_bigtts", name="つき（月）"),
-            Voice(voice_id="multi_female_gaolengyujie_moon_bigtts", name="あけみ（朱美）"),
+            Voice(
+                voice_id="multi_female_maomao_conversation_wvae_bigtts",
+                name="つき（月）"),
+            Voice(
+                voice_id="multi_female_gaolengyujie_moon_bigtts",
+                name="あけみ（朱美）"),
             Voice(voice_id="multi_male_jingqiangkanye_moon_bigtts",
                   name="かずね（和音）/JavierorÁlvaro"),
             Voice(voice_id="multi_female_shuangkuaisisi_moon_bigtts",
@@ -879,9 +1053,15 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
                   name="ひろし（広志）/Roberto")
         },
         "es-MX": {
-            Voice(voice_id="multi_female_maomao_conversation_wvae_bigtts", name="Diana"),
-            Voice(voice_id="multi_male_M100_conversation_wvae_bigtts", name="Lucía"),
-            Voice(voice_id="multi_female_sophie_conversation_wvae_bigtts", name="Sofía"),
+            Voice(
+                voice_id="multi_female_maomao_conversation_wvae_bigtts",
+                name="Diana"),
+            Voice(
+                voice_id="multi_male_M100_conversation_wvae_bigtts",
+                name="Lucía"),
+            Voice(
+                voice_id="multi_female_sophie_conversation_wvae_bigtts",
+                name="Sofía"),
             Voice(voice_id="multi_male_xudong_conversation_wvae_bigtts",
                   name="Daníel"),
             Voice(voice_id="multi_male_jingqiangkanye_moon_bigtts",

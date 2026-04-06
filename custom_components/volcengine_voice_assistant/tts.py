@@ -23,7 +23,8 @@ from .config import DEFAULT_VOICES, VALID_VOICES
 from .sdk.tts import Client
 
 
-async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
+async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry,
+                            async_add_entities: AddConfigEntryEntitiesCallback) -> None:
     """Setup tts provider"""
 
     for subentry in config_entry.subentries.values():
@@ -90,28 +91,34 @@ class SubentryFlow(ConfigSubentryFlow):
 
     __logger: Logger = LOGGER.getChild(__qualname__)
 
-    async def async_step_user(self, user_input: dict[str, Any]) -> SubentryFlowResult:
+    async def async_step_user(
+            self, user_input: dict[str, Any]) -> SubentryFlowResult:
         """User flow to add a new location."""
         if user_input is None:
-            return self.async_show_form(step_id="user", data_schema=self.USER_DATA_SCHEMA)
+            return self.async_show_form(
+                step_id="user", data_schema=self.USER_DATA_SCHEMA)
 
         if not await self.__is_valid_user_input(user_input):
             return self.async_abort(reason="Can not connect to server")
 
-        return self.async_create_entry(title=user_input["name"], data=user_input, unique_id=gen_unique_id(user_input["name"]))
+        return self.async_create_entry(
+            title=user_input["name"], data=user_input, unique_id=gen_unique_id(user_input["name"]))
 
-    async def async_step_reconfigure(self, user_input: dict[str, Any]) -> SubentryFlowResult:
+    async def async_step_reconfigure(
+            self, user_input: dict[str, Any]) -> SubentryFlowResult:
         """User flow to modify an existing location."""
         if user_input is None:
             suggested_values = dict(self._get_reconfigure_subentry().data)
             del suggested_values['access_key']
-            return self.async_show_form(step_id="reconfigure", data_schema=self.add_suggested_values_to_schema(self.RECONFIGURE_DATA_SCHEMA, suggested_values))
+            return self.async_show_form(step_id="reconfigure", data_schema=self.add_suggested_values_to_schema(
+                self.RECONFIGURE_DATA_SCHEMA, suggested_values))
 
         error: str = await self.__is_valid_user_input(user_input)
         if error:
             return self.async_abort(reason=error)
 
-        return self.async_update_and_abort(self._get_entry(), self._get_reconfigure_subentry(), data_updates=user_input)
+        return self.async_update_and_abort(
+            self._get_entry(), self._get_reconfigure_subentry(), data_updates=user_input)
 
     async def __is_valid_user_input(self, user_input: dict[str, Any]) -> str:
         try:
@@ -122,8 +129,8 @@ class SubentryFlow(ConfigSubentryFlow):
         except Exception as e:
             del user_input["access_key"]
             self.__logger.exception(
-                f"Invalid user input: {user_input}, error: {e}")
-            return f"{e}"
+                "Invalid user input: %s, error: %s", user_input, e)
+            return e
 
 
 class Provider(TextToSpeechEntity):
@@ -145,7 +152,8 @@ class Provider(TextToSpeechEntity):
     __enable_timestamp: bool = True
     __disable_markdown_filter: bool = False
 
-    def __init__(self, name: str, url: str, app_key: str, access_key: str, resource_id: str):
+    def __init__(self, name: str, url: str, app_key: str,
+                 access_key: str, resource_id: str):
         self._attr_name = name
         self._attr_unique_id = gen_unique_id(name)
         self._attr_default_options = {"voice": DEFAULT_VOICES.get(resource_id)}
@@ -163,30 +171,35 @@ class Provider(TextToSpeechEntity):
     def async_get_supported_voices(self, language: str) -> list[Voice]:
         return VALID_VOICES.get(self.__resource_id).get(language)
 
-    def get_tts_audio(self, message: str, language: str, options: dict[str, Any]) -> TtsAudioType:
-        return asyncio.run(self.async_get_tts_audio(message, language, options))
+    def get_tts_audio(self, message: str, language: str,
+                      options: dict[str, Any]) -> TtsAudioType:
+        return asyncio.run(self.async_get_tts_audio(
+            message, language, options))
 
-    async def async_stream_tts_audio(self, request: TTSAudioRequest) -> TTSAudioResponse:
-        return TTSAudioResponse(self.__encoding,  self.__async_stream_tts_audio(request))
+    async def async_stream_tts_audio(
+            self, request: TTSAudioRequest) -> TTSAudioResponse:
+        return TTSAudioResponse(
+            self.__encoding, self.__async_stream_tts_audio(request))
 
-    async def __async_stream_tts_audio(self, request: TTSAudioRequest) -> AsyncGenerator[bytes]:
+    async def __async_stream_tts_audio(
+            self, request: TTSAudioRequest) -> AsyncGenerator[bytes]:
         async with Client(self.__url, self.__app_key, self.__access_key, self.__resource_id) as client:
             resp = await client.async_connect()
-            self.__logger.info(f"Connect successfully, response: {resp}")
+            self.__logger.info("Connect successfully, response: %s", resp)
 
             try:
                 resp = await client.async_start_session(
                     str(uuid.uuid4()), request.options.get("voice"),
                     self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter)
                 self.__logger.info(
-                    f"Start session successfully, response: {resp}")
+                    "Start session successfully, response: %s", resp)
 
                 async def sender():
                     try:
                         async for text in request.message_gen:
                             await client.async_send_task(text)
                     except Exception as e:
-                        self.__logger.exception(f"Send text failed: {e}")
+                        self.__logger.exception("Send text failed: %s", e)
                         raise
                     finally:
                         await client.async_finish_session()
@@ -199,7 +212,7 @@ class Provider(TextToSpeechEntity):
                     async for resp in client.async_recv():
                         yield resp.payload
                 except Exception as e:
-                    self.__logger.exception(f"Failed to process request: {e}")
+                    self.__logger.exception("Failed to process request: %s", e)
 
                     try:
                         sender_task.cancel()
@@ -211,6 +224,6 @@ class Provider(TextToSpeechEntity):
 
                     raise
             except Exception as e:
-                self.__logger.exception(f"Text to speech failed: {e}")
+                self.__logger.exception("Text to speech failed: %s", e)
             finally:
                 await client.async_disconnect()

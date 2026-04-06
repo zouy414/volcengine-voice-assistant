@@ -1,5 +1,7 @@
 #!.venv/bin/python3
 
+"""ASR cli client"""
+
 import asyncio
 import logging
 from logging import Logger
@@ -7,18 +9,20 @@ from logging import Logger
 from custom_components.volcengine_voice_assistant.sdk.asr import Client
 
 
-async def run(file: str, language: str, url: str, app_key: str, access_key: str,  resource_id: str):
+async def run(file: str, language: str, url: str,
+              app_key: str, access_key: str, resource_id: str):
+    """Run"""
     logger: Logger = logging.getLogger(__name__)
-    async with Client(url, app_key, access_key,  resource_id) as client:
+    async with Client(url, app_key, access_key, resource_id) as client:
         resp = await client.async_connect(__name__, language)
-        logger.info(f"Connect successfully, response: {resp}", )
+        logger.info("Connect successfully, response: %s", resp)
 
         async def async_sender():
             try:
                 async for _ in client.async_send_file(file):
                     pass
             except Exception as e:
-                logger.exception(f"Send audio failed: {e}")
+                logger.exception("Send audio failed: %s", e)
                 raise
             finally:
                 await client.async_disconnect()
@@ -26,10 +30,10 @@ async def run(file: str, language: str, url: str, app_key: str, access_key: str,
 
         try:
             async for resp in client.async_recv():
-                logger.info(f"Recv resp: {resp}")
+                logger.info("Recv resp: %s", resp)
             await sender_task
         except Exception as e:
-            logger.exception(f"Failed to process audio stream: {e}")
+            logger.exception("Failed to process audio stream: %s", e)
 
             try:
                 sender_task.cancel()

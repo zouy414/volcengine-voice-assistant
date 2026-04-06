@@ -32,7 +32,8 @@ def judge_wav(data: bytes) -> bool:
         return False
 
 
-def gen_wav_segment(sample_rate: int, bit_rate: int, channels: int, data: bytes = b"") -> bytes:
+def gen_wav_segment(sample_rate: int, bit_rate: int,
+                    channels: int, data: bytes = b"") -> bytes:
     """Generate a wav segment"""
     buff = io.BytesIO()
 
@@ -81,10 +82,10 @@ def read_wav_info(data: bytes) -> Tuple[int, int, int, int, bytes]:
     # Parse data subchunk
     pos = 36
     while pos < len(data) - 8:
-        subchunk_id = data[pos:pos+4]
-        subchunk_size = struct.unpack('<I', data[pos+4:pos+8])[0]
+        subchunk_id = data[pos:pos + 4]
+        subchunk_size = struct.unpack('<I', data[pos + 4:pos + 8])[0]
         if subchunk_id == b'data':
-            wave_data = data[pos+8:pos+8+subchunk_size]
+            wave_data = data[pos + 8:pos + 8 + subchunk_size]
             return (
                 num_channels,
                 bits_per_sample // 8,

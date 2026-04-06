@@ -24,7 +24,8 @@ from .sdk.asr import Client
 from .sdk.utils import gen_wav_segment
 
 
-async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
+async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry,
+                            async_add_entities: AddConfigEntryEntitiesCallback) -> None:
     """Setup stt provider"""
 
     for subentry in config_entry.subentries.values():
@@ -103,28 +104,34 @@ class SubentryFlow(ConfigSubentryFlow):
 
     __logger: Logger = LOGGER.getChild(__qualname__)
 
-    async def async_step_user(self, user_input: dict[str, Any]) -> SubentryFlowResult:
+    async def async_step_user(
+            self, user_input: dict[str, Any]) -> SubentryFlowResult:
         """User flow to add a new location."""
         if user_input is None:
-            return self.async_show_form(step_id="user", data_schema=self.USER_DATA_SCHEMA)
+            return self.async_show_form(
+                step_id="user", data_schema=self.USER_DATA_SCHEMA)
 
         if not await self.__is_valid_user_input(user_input):
             return self.async_abort(reason="Can not connect to server")
 
-        return self.async_create_entry(title=user_input["name"], data=user_input, unique_id=gen_unique_id(user_input["name"]))
+        return self.async_create_entry(
+            title=user_input["name"], data=user_input, unique_id=gen_unique_id(user_input["name"]))
 
-    async def async_step_reconfigure(self, user_input: dict[str, Any]) -> SubentryFlowResult:
+    async def async_step_reconfigure(
+            self, user_input: dict[str, Any]) -> SubentryFlowResult:
         """User flow to modify an existing location."""
         if user_input is None:
             suggested_values = dict(self._get_reconfigure_subentry().data)
             del suggested_values['access_key']
-            return self.async_show_form(step_id="reconfigure", data_schema=self.add_suggested_values_to_schema(self.RECONFIGURE_DATA_SCHEMA, suggested_values))
+            return self.async_show_form(step_id="reconfigure", data_schema=self.add_suggested_values_to_schema(
+                self.RECONFIGURE_DATA_SCHEMA, suggested_values))
 
         error: str = await self.__is_valid_user_input(user_input)
         if error:
             return self.async_abort(reason=error)
 
-        return self.async_update_and_abort(self._get_entry(), self._get_reconfigure_subentry(), data_updates=user_input)
+        return self.async_update_and_abort(
+            self._get_entry(), self._get_reconfigure_subentry(), data_updates=user_input)
 
     async def __is_valid_user_input(self, user_input: dict[str, Any]) -> str:
         try:
@@ -138,8 +145,8 @@ class SubentryFlow(ConfigSubentryFlow):
         except Exception as e:
             del user_input["access_key"]
             self.__logger.exception(
-                f"Invalid user input: {user_input}, error: {e}")
-            return f"{e}"
+                "Invalid user input: %s, error: %s", user_input, e)
+            return e
 
 
 class Provider(SpeechToTextEntity):
@@ -154,7 +161,8 @@ class Provider(SpeechToTextEntity):
     __access_key: str
     __resource_id: str
 
-    def __init__(self, name: str, url: str, app_key: str, access_key: str, resource_id: str):
+    def __init__(self, name: str, url: str, app_key: str,
+                 access_key: str, resource_id: str):
         self._attr_name = name
         self._attr_unique_id = gen_unique_id(name)
 
@@ -166,7 +174,8 @@ class Provider(SpeechToTextEntity):
 
     @property
     def supported_languages(self) -> list[str]:
-        return ["zh-CN", "en-US", "ja-JP", "id-ID", "es-MX", "pt-BR", "de-DE", "fr-FR", "ko-KR", "fil-PH", "ms-MY", "th-TH", "ar-SA", "it-IT", "bn-BD", "el-GR", "nl-NL", "ru-RU", "tr-TR", "vi-VN", "pl-PL", "ro-RO", "ne-NP", "uk-UA", "yue-CN"]
+        return ["zh-CN", "en-US", "ja-JP", "id-ID", "es-MX", "pt-BR", "de-DE", "fr-FR", "ko-KR", "fil-PH", "ms-MY", "th-TH",
+                "ar-SA", "it-IT", "bn-BD", "el-GR", "nl-NL", "ru-RU", "tr-TR", "vi-VN", "pl-PL", "ro-RO", "ne-NP", "uk-UA", "yue-CN"]
 
     @property
     def supported_formats(self) -> list[AudioFormats]:
@@ -188,9 +197,10 @@ class Provider(SpeechToTextEntity):
     def supported_channels(self) -> list[AudioChannels]:
         return [AudioChannels.CHANNEL_MONO, AudioChannels.CHANNEL_STEREO]
 
-    async def async_process_audio_stream(self, metadata: SpeechMetadata, stream: AsyncIterable[bytes]) -> SpeechResult:
+    async def async_process_audio_stream(
+            self, metadata: SpeechMetadata, stream: AsyncIterable[bytes]) -> SpeechResult:
         self.__logger.info(f"Start speech to text, metadata: {metadata}")
-        async with Client(self.__url, self.__app_key, self.__access_key,  self.__resource_id) as client:
+        async with Client(self.__url, self.__app_key, self.__access_key, self.__resource_id) as client:
             # Connect to the server with the specified audio parameters
             resp = await client.async_connect(
                 self._attr_name, metadata.language,
@@ -208,13 +218,14 @@ class Provider(SpeechToTextEntity):
                             huge_segment += segment
                         await client.async_send_segment(gen_wav_segment(metadata.sample_rate, metadata.bit_rate, metadata.channel, huge_segment))
                     except Exception as e:
-                        self.__logger.exception(f"Send segment failed: {e}")
+                        self.__logger.exception("Send segment failed: %s", e)
                         raise
                     finally:
                         await client.async_disconnect()
                 sender_task = asyncio.create_task(async_sender())
 
-                # Collect responses from the server and concatenate them into a single result string
+                # Collect responses from the server and concatenate them into a
+                # single result string
                 result: str = ""
                 try:
                     async for response in client.async_recv():
@@ -228,7 +239,7 @@ class Provider(SpeechToTextEntity):
 
                     return SpeechResult(result, SpeechResultState.SUCCESS)
                 except Exception as e:
-                    self.__logger.exception(f"Failed to process stream: {e}")
+                    self.__logger.exception("Failed to process stream: %s", e)
 
                     try:
                         sender_task.cancel()
@@ -240,4 +251,4 @@ class Provider(SpeechToTextEntity):
 
                     return SpeechResult(e, SpeechResultState.ERROR)
             except Exception as e:
-                self.__logger.exception(f"Speech to text failed: {e}")
+                self.__logger.exception("Speech to text failed: %s", e)

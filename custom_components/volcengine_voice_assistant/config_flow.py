@@ -18,17 +18,20 @@ class VolcengineVoiceAssistantConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return False
 
-    async def async_step_user(self, _: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_user(
+            self, _: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle a flow initiated by the user."""
 
         if self._async_current_entries():
             return self.async_abort(reason="already_configured")
 
-        return self.async_create_entry(title="Volcengine Voice Assistant", data={})
+        return self.async_create_entry(
+            title="Volcengine Voice Assistant", data={})
 
     @classmethod
     @callback
-    def async_get_supported_subentry_types(cls, _: ConfigEntry) -> dict[str, type[ConfigSubentryFlow]]:
+    def async_get_supported_subentry_types(
+            cls, _: ConfigEntry) -> dict[str, type[ConfigSubentryFlow]]:
         return {
             "stt": stt.SubentryFlow,
             "tts": tts.SubentryFlow

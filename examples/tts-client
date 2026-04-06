@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-import argparse
+
+"""TTS cli client"""
+
 import asyncio
 import logging
 import uuid
@@ -7,7 +9,9 @@ import uuid
 from custom_components.volcengine_voice_assistant.sdk.tts import Client
 
 
-async def run(text: str, voice_type: str, file: str, url: str, app_key: str, access_key: str,  resource_id: str):
+async def run(text: str, voice_type: str, file: str, url: str,
+              app_key: str, access_key: str, resource_id: str):
+    """Run"""
     logger: logging.Logger = logging.getLogger(__name__)
     async with Client(url, app_key, access_key, resource_id) as client:
         resp = await client.async_connect()
@@ -21,7 +25,7 @@ async def run(text: str, voice_type: str, file: str, url: str, app_key: str, acc
                 try:
                     await client.async_send_task(text)
                 except Exception as e:
-                    logger.exception(f"sender text failed: {e}")
+                    logger.exception("sender text failed: %s", e)
                     raise
                 finally:
                     await client.async_finish_session()
@@ -39,7 +43,7 @@ async def run(text: str, voice_type: str, file: str, url: str, app_key: str, acc
                 with open(file, "wb") as f:
                     f.write(audio_data)
             except Exception as e:
-                logger.exception(f"Failed to recv audio: {e}")
+                logger.exception("Failed to recv audio: %s", e)
 
                 try:
                     sender_task.cancel()
@@ -50,7 +54,7 @@ async def run(text: str, voice_type: str, file: str, url: str, app_key: str, acc
 
                 raise
         except Exception as e:
-            logger.exception(f"TSS failed: {e}")
+            logger.exception("TSS failed: %s", e)
         finally:
             await client.async_disconnect()
 

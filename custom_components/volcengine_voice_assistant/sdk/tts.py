@@ -283,7 +283,8 @@ class Message:
             MsgType.AUDIO_ONLY_CLIENT,
             MsgType.AUDIO_ONLY_SERVER,
         ]:
-            if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ, MsgTypeFlagBits.NEGATIVE_SEQ]:
+            if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ,
+                             MsgTypeFlagBits.NEGATIVE_SEQ]:
                 writers.append(self._write_sequence)
         elif self.type == MsgType.ERROR:
             writers.append(self._write_error_code)
@@ -304,7 +305,8 @@ class Message:
             MsgType.AUDIO_ONLY_CLIENT,
             MsgType.AUDIO_ONLY_SERVER,
         ]:
-            if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ, MsgTypeFlagBits.NEGATIVE_SEQ]:
+            if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ,
+                             MsgTypeFlagBits.NEGATIVE_SEQ]:
                 readers.append(self._read_sequence)
         elif self.type == MsgType.ERROR:
             readers.append(self._read_error_code)
@@ -420,14 +422,16 @@ class Message:
     def __str__(self) -> str:
         """String representation"""
         if self.type in [MsgType.AUDIO_ONLY_SERVER, MsgType.AUDIO_ONLY_CLIENT]:
-            if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ, MsgTypeFlagBits.NEGATIVE_SEQ]:
+            if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ,
+                             MsgTypeFlagBits.NEGATIVE_SEQ]:
                 return f"MsgType: {self.type}, EventType:{self.event}, Sequence: {self.sequence}, PayloadSize: {len(self.payload)}"
             return f"MsgType: {self.type}, EventType:{self.event}, PayloadSize: {len(self.payload)}"
 
         if self.type == MsgType.ERROR:
             return f"MsgType: {self.type}, EventType:{self.event}, ErrorCode: {self.error_code}, Payload: {self.payload.decode('utf-8', 'ignore')}"
 
-        if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ, MsgTypeFlagBits.NEGATIVE_SEQ]:
+        if self.flag in [MsgTypeFlagBits.POSITIVE_SEQ,
+                         MsgTypeFlagBits.NEGATIVE_SEQ]:
             return f"MsgType: {self.type}, EventType:{self.event}, Sequence: {self.sequence}, Payload: {self.payload.decode('utf-8', 'ignore')}"
 
         return f"MsgType: {self.type}, EventType:{self.event}, Payload: {self.payload.decode('utf-8', 'ignore')}"
@@ -460,7 +464,8 @@ class DisconnectRequest(Message):
 class StartSessionRequest(Message):
     """StartSession request"""
 
-    def __init__(self, session_id: str, voice_type: str, encoding: str, sample_rate: int, enable_timestamp: bool, disable_markdown_filter: bool):
+    def __init__(self, session_id: str, voice_type: str, encoding: str,
+                 sample_rate: int, enable_timestamp: bool, disable_markdown_filter: bool):
         super().__init__(
             type=MsgType.FULL_CLIENT_REQUEST,
             flag=MsgTypeFlagBits.WITH_EVENT,
@@ -520,7 +525,8 @@ class CancelSessionRequest(Message):
 class TaskRequest(Message):
     """Task request"""
 
-    def __init__(self, session_id: str, text: str, voice_type: str, encoding: str, sample_rate: int, enable_timestamp: bool, disable_markdown_filter: bool):
+    def __init__(self, session_id: str, text: str, voice_type: str, encoding: str,
+                 sample_rate: int, enable_timestamp: bool, disable_markdown_filter: bool):
         super().__init__(
             type=MsgType.FULL_CLIENT_REQUEST,
             flag=MsgTypeFlagBits.WITH_EVENT,
@@ -578,7 +584,8 @@ class Client:
     __enable_timestamp: bool
     __disable_markdown_filter: bool
 
-    def __init__(self, url: str, app_key: str, access_key: str,  resource_id: str):
+    def __init__(self, url: str, app_key: str,
+                 access_key: str, resource_id: str):
         self.__url = url
         self.__auth_header = {
             "X-Api-App-Key": app_key,
@@ -617,7 +624,8 @@ class Client:
             raise ValueError(f"Unexpected message type: {msg}")
         return Response(msg.data)
 
-    async def async_wait_for_event(self, msg_type: MsgType, event_type: EventType) -> Message:
+    async def async_wait_for_event(
+            self, msg_type: MsgType, event_type: EventType) -> Message:
         """Wait for specific event"""
         resp: Response = await self.async_recv_response()
         if resp.type != msg_type or resp.event != event_type:
@@ -635,7 +643,8 @@ class Client:
         await self.async_send_request(DisconnectRequest())
         return await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.CONNECTION_FINISH)
 
-    async def async_start_session(self, session_id: str, voice_type: str, encoding: str = "mp3", sample_rate: int = 24000, enable_timestamp: bool = True, disable_markdown_filter: bool = False) -> Response:
+    async def async_start_session(self, session_id: str, voice_type: str, encoding: str = "mp3",
+                                  sample_rate: int = 24000, enable_timestamp: bool = True, disable_markdown_filter: bool = False) -> Response:
         """Start session"""
         self.__session_id = session_id
         self.__voice_type = voice_type
@@ -659,7 +668,8 @@ class Client:
         """Send task request"""
         await self.async_send_request(TaskRequest(self.__session_id, text, self.__voice_type, self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter))
 
-    async def async_recv(self, timeout: float = 30) -> AsyncGenerator[Response]:
+    async def async_recv(
+            self, timeout: float = 30) -> AsyncGenerator[Response]:
         """Receive responses from the server and yield them as Response objects until the session finished or an error occurs."""
         while True:
             msg = await self.__conn.receive(timeout=timeout)
