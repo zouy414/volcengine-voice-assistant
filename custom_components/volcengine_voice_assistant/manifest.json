@@ -1,13 +1,14 @@
 {
     "domain": "volcengine_voice_assistant",
     "name": "Volcengine Voice Assistant",
-    "version": "v0.0.0",
-    "documentation": "https://github.com/zouy414/volcengine-voice-assistant",
-    "integration_type": "service",
-    "iot_class": "cloud_polling",
-    "dependencies": [],
     "codeowners": [
         "@zouy414"
     ],
-    "config_flow": true
+    "config_flow": true,
+    "dependencies": [],
+    "documentation": "https://github.com/zouy414/volcengine-voice-assistant",
+    "integration_type": "service",
+    "iot_class": "cloud_polling",
+    "issue_tracker": "https://github.com/zouy414/volcengine-voice-assistant/issues",
+    "version": "v0.0.0"
 }
