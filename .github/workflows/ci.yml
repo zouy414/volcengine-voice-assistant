@@ -9,6 +9,16 @@ permissions:
   contents: read
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: HACS
+        uses: hacs/action@22.5.0
+        with:
+          category: integration
+      - name: HASS
+        uses: home-assistant/actions/hassfest@master
   build:
     runs-on: ubuntu-latest
     steps:
@@ -27,3 +37,4 @@ jobs:
           python -m pylint $(git ls-files '*.py')
           python3 -m isort $(git ls-files '*.py')
           python3 -m autopep8 --diff --aggressive $(git ls-files '*.py')
+            - name: HACS Action
