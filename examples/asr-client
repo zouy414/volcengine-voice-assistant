@@ -19,8 +19,7 @@ async def run(file: str, language: str, url: str,
 
         async def async_sender():
             try:
-                async for _ in client.async_send_file(file):
-                    pass
+                await client.async_send_file(file)
             except Exception as e:
                 logger.exception("Send audio failed: %s", e)
                 raise

@@ -3,7 +3,6 @@
 
 import gzip
 import io
-import struct
 import subprocess
 import wave
 from typing import Tuple
@@ -32,9 +31,9 @@ def judge_wav(data: bytes) -> bool:
         return False
 
 
-def gen_wav_segment(sample_rate: int, bit_rate: int,
+def gen_wav_content(sample_rate: int, bit_rate: int,
                     channels: int, data: bytes = b"") -> bytes:
-    """Generate a wav segment"""
+    """Generate a wav content from pcm"""
     buff = io.BytesIO()
 
     # pylint: disable=E1101
@@ -60,41 +59,14 @@ def convert_wav_with_path(audio_path: str, sample_rate: int) -> bytes:
     return result.stdout
 
 
-def read_wav_info(data: bytes) -> Tuple[int, int, int, int, bytes]:
-    """Read wav header"""
-    if len(data) < 44:
-        raise ValueError("Invalid WAV file: too short")
+def read_wav_info(data: bytes) -> Tuple[int, int, int]:
+    """Read wav header
 
-    # Parse WAV header
-    chunk_id = data[:4]
-    if chunk_id != b'RIFF':
-        raise ValueError("Invalid WAV file: not RIFF format")
-    format_ = data[8:12]
-    if format_ != b'WAVE':
-        raise ValueError("Invalid WAV file: not WAVE format")
-
-    # Parse fmt subchunk
-    # audio_format = struct.unpack('<H', data[20:22])[0]
-    num_channels = struct.unpack('<H', data[22:24])[0]
-    sample_rate = struct.unpack('<I', data[24:28])[0]
-    bits_per_sample = struct.unpack('<H', data[34:36])[0]
-
-    # Parse data subchunk
-    pos = 36
-    while pos < len(data) - 8:
-        subchunk_id = data[pos:pos + 4]
-        subchunk_size = struct.unpack('<I', data[pos + 4:pos + 8])[0]
-        if subchunk_id == b'data':
-            wave_data = data[pos + 8:pos + 8 + subchunk_size]
-            return (
-                num_channels,
-                bits_per_sample // 8,
-                sample_rate,
-                subchunk_size // (num_channels * (bits_per_sample // 8)),
-                wave_data
-            )
-        pos += 8 + subchunk_size
-    raise ValueError("Invalid WAV file: no data subchunk found")
+    Return nchannels,sampwidth,framerate
+    """
+    buff = io.BytesIO(data)
+    with wave.open(buff, 'rb') as wavf:
+        return [wavf.getnchannels(), wavf.getsampwidth(), wavf.getframerate()]
 
 
 def read_audio_file(file_path: str, sample_rate: int) -> bytes:

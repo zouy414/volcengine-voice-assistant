@@ -1,6 +1,7 @@
 {
     "config": {
         "flow_title": "Add Volcengine Voice Assistant",
+        "step": {},
         "abort": {
             "already_configured": "Already Configured"
         }
@@ -22,16 +23,6 @@
                         "app_key": "App Key",
                         "access_key": "Access Key",
                         "resource_id": "Resource ID"
-                    },
-                    "description": {
-                        "name": "The name of the STT service",
-                        "url": "The URL of the STT service",
-                        "app_key": "The app key for the STT service",
-                        "access_key": "The access key for the STT service",
-                        "resource_id": "The resource ID for the STT service"
-                    },
-                    "abort": {
-                        "already_configured": "Already Configured"
                     }
                 },
                 "reconfigure": {
@@ -41,12 +32,6 @@
                         "app_key": "App Key",
                         "access_key": "Access Key",
                         "resource_id": "Resource ID"
-                    },
-                    "description": {
-                        "url": "The URL of the STT service",
-                        "app_key": "The app key for the STT service",
-                        "access_key": "The access key for the STT service",
-                        "resource_id": "The resource ID for the STT service"
                     }
                 }
             }
@@ -67,16 +52,6 @@
                         "app_key": "App Key",
                         "access_key": "Access Key",
                         "resource_id": "Resource ID"
-                    },
-                    "description": {
-                        "name": "The name of the STT service",
-                        "url": "The URL of the STT service",
-                        "app_key": "The app key for the STT service",
-                        "access_key": "The access key for the STT service",
-                        "resource_id": "The resource ID for the STT service"
-                    },
-                    "abort": {
-                        "already_configured": "Already Configured"
                     }
                 },
                 "reconfigure": {
@@ -86,12 +61,6 @@
                         "app_key": "App Key",
                         "access_key": "Access Key",
                         "resource_id": "Resource ID"
-                    },
-                    "description": {
-                        "url": "The URL of the STT service",
-                        "app_key": "The app key for the STT service",
-                        "access_key": "The access key for the STT service",
-                        "resource_id": "The resource ID for the STT service"
                     }
                 }
             }
