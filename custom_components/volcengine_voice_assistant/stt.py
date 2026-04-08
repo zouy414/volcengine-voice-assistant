@@ -240,6 +240,7 @@ class Provider(SpeechToTextEntity):
 
                     await sender_task
 
+                    self.__logger.info("Speech to text completed")
                     return SpeechResult(result, SpeechResultState.SUCCESS)
                 except Exception as e:
                     self.__logger.exception("Failed to process stream: %s", e)

@@ -210,6 +210,8 @@ class Provider(TextToSpeechEntity):
                 try:
                     async for resp in client.async_recv():
                         yield resp.payload
+
+                    logger.info("Text to speech completed")
                 except Exception as e:
                     logger.exception("Failed to process request: %s", e)
                     if sender_task.cancel():
