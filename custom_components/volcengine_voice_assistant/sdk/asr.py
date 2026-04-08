@@ -411,7 +411,7 @@ class Client:
             if resp.is_last_package:
                 break
 
-            if resp.code != 0 or resp.event != 0:
+            if resp.code != 0:
                 raise RuntimeError(
                     f"WebSocket closed unexpectedly: {resp.to_dict()}")
 
