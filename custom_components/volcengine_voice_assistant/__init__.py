@@ -9,13 +9,7 @@ from homeassistant.core import HomeAssistant
 
 DOMAIN = "volcengine_voice_assistant"
 PLATFORMS = [Platform.STT, Platform.TTS]
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-)
-
-LOGGER: Logger = logging.getLogger(__name__)
+LOGGER: Logger = logging.getLogger()
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

@@ -160,7 +160,6 @@ class Provider(SpeechToTextEntity):
     __app_key: str
     __access_key: str
     __resource_id: str
-    __segment_duration: int = 200
 
     def __init__(self, name: str, url: str, app_key: str,
                  access_key: str, resource_id: str):
@@ -244,15 +243,8 @@ class Provider(SpeechToTextEntity):
                     return SpeechResult(result, SpeechResultState.SUCCESS)
                 except Exception as e:
                     self.__logger.exception("Failed to process stream: %s", e)
-
-                    try:
-                        sender_task.cancel()
+                    if sender_task.cancel():
                         await sender_task
-                        self.__logger.info(
-                            "Sender task cancelled successfully")
-                    except asyncio.CancelledError:
-                        pass
-
                     return SpeechResult(e, SpeechResultState.ERROR)
             except Exception as e:
                 self.__logger.exception("Speech to text failed: %s", e)

@@ -1,7 +1,6 @@
 """Support for Volcengine TTS service."""
 
 import asyncio
-import uuid
 from logging import Logger
 from typing import Any, AsyncGenerator, Mapping
 
@@ -186,20 +185,20 @@ class Provider(TextToSpeechEntity):
         async with Client(self.__url, self.__app_key, self.__access_key, self.__resource_id) as client:
             resp = await client.async_connect()
             self.__logger.info("Connect successfully, response: %s", resp)
-
             try:
-                resp = await client.async_start_session(
-                    str(uuid.uuid4()), request.options.get("voice"),
+                (session_id, resp) = await client.async_start_session(
+                    self._attr_name, request.options.get("voice"),
                     self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter)
                 self.__logger.info(
-                    "Start session successfully, response: %s", resp)
+                    "Start session successfully, session_id: %s, response: %s", session_id, resp)
+                logger = self.__logger.getChild(session_id)
 
                 async def sender():
                     try:
                         async for text in request.message_gen:
                             await client.async_send_task(text)
                     except Exception as e:
-                        self.__logger.exception("Send text failed: %s", e)
+                        logger.exception("Send text failed: %s", e)
                         raise
                     finally:
                         await client.async_finish_session()
@@ -212,16 +211,9 @@ class Provider(TextToSpeechEntity):
                     async for resp in client.async_recv():
                         yield resp.payload
                 except Exception as e:
-                    self.__logger.exception("Failed to process request: %s", e)
-
-                    try:
-                        sender_task.cancel()
+                    logger.exception("Failed to process request: %s", e)
+                    if sender_task.cancel():
                         await sender_task
-                        self.__logger.info(
-                            "Sender task cancelled successfully")
-                    except asyncio.CancelledError:
-                        pass
-
                     raise
             except Exception as e:
                 self.__logger.exception("Text to speech failed: %s", e)

@@ -10,7 +10,7 @@ import struct
 import uuid
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import AsyncGenerator, Callable, Dict, List
+from typing import AsyncGenerator, Callable, Dict, List, Tuple
 
 from aiohttp import ClientSession, ClientWebSocketResponse, WSMsgType
 
@@ -464,7 +464,7 @@ class DisconnectRequest(Message):
 class StartSessionRequest(Message):
     """StartSession request"""
 
-    def __init__(self, session_id: str, voice_type: str, encoding: str,
+    def __init__(self, uid: str, session_id: str, voice_type: str, encoding: str,
                  sample_rate: int, enable_timestamp: bool, disable_markdown_filter: bool):
         super().__init__(
             type=MsgType.FULL_CLIENT_REQUEST,
@@ -474,7 +474,7 @@ class StartSessionRequest(Message):
             payload=json.dumps(
                 {
                     "user": {
-                        "uid": str(uuid.uuid4()),
+                        "uid": uid,
                     },
                     "event": EventType.START_SESSION,
                     "namespace": "BidirectionalTTS",
@@ -525,7 +525,7 @@ class CancelSessionRequest(Message):
 class TaskRequest(Message):
     """Task request"""
 
-    def __init__(self, session_id: str, text: str, voice_type: str, encoding: str,
+    def __init__(self, uid: str, session_id: str, text: str, voice_type: str, encoding: str,
                  sample_rate: int, enable_timestamp: bool, disable_markdown_filter: bool):
         super().__init__(
             type=MsgType.FULL_CLIENT_REQUEST,
@@ -535,7 +535,7 @@ class TaskRequest(Message):
             payload=json.dumps(
                 {
                     "user": {
-                        "uid": str(uuid.uuid4()),
+                        "uid": uid,
                     },
                     "event": EventType.TASK_REQUEST,
                     "namespace": "BidirectionalTTS",
@@ -577,6 +577,7 @@ class Client:
     __session: ClientSession = None
     __conn: ClientWebSocketResponse = None
 
+    __uid: str
     __session_id: str
     __voice_type: str
     __encoding: str
@@ -643,18 +644,19 @@ class Client:
         await self.async_send_request(DisconnectRequest())
         return await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.CONNECTION_FINISH)
 
-    async def async_start_session(self, session_id: str, voice_type: str, encoding: str = "mp3",
-                                  sample_rate: int = 24000, enable_timestamp: bool = True, disable_markdown_filter: bool = False) -> Response:
+    async def async_start_session(self, uid: str, voice_type: str, encoding: str = "mp3",
+                                  sample_rate: int = 24000, enable_timestamp: bool = True, disable_markdown_filter: bool = False) -> Tuple[str, Response]:
         """Start session"""
-        self.__session_id = session_id
+        self.__uid = uid
+        self.__session_id = str(uuid.uuid4())
         self.__voice_type = voice_type
         self.__encoding = encoding
         self.__sample_rate = sample_rate
         self.__enable_timestamp = enable_timestamp
         self.__disable_markdown_filter = disable_markdown_filter
 
-        await self.async_send_request(StartSessionRequest(session_id, voice_type, encoding, sample_rate, enable_timestamp, disable_markdown_filter))
-        return await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.SESSION_START)
+        await self.async_send_request(StartSessionRequest(uid, self.__session_id, voice_type, encoding, sample_rate, enable_timestamp, disable_markdown_filter))
+        return (self.__session_id, await self.async_wait_for_event(MsgType.FULL_SERVER_RESPONSE, EventType.SESSION_START))
 
     async def async_finish_session(self):
         """Finish session"""
@@ -666,7 +668,7 @@ class Client:
 
     async def async_send_task(self, text: bytes):
         """Send task request"""
-        await self.async_send_request(TaskRequest(self.__session_id, text, self.__voice_type, self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter))
+        await self.async_send_request(TaskRequest(self.__uid, self.__session_id, text, self.__voice_type, self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter))
 
     async def async_recv(
             self, timeout: float = 30) -> AsyncGenerator[Response]:
