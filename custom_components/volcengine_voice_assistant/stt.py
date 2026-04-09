@@ -138,7 +138,7 @@ class SubentryFlow(ConfigSubentryFlow):
         try:
             async with Client(user_input["url"], user_input["app_key"], user_input["access_key"], user_input["resource_id"]) as client:
                 await client.async_connect(
-                    user_input["name"], "zh-CN",
+                    "validation", "zh-CN",
                     audio_format=AudioFormats.WAV, audio_codec=AudioCodecs.PCM, audio_rate=AudioSampleRates.SAMPLERATE_16000, audio_bits=AudioBitRates.BITRATE_16, audio_channels=AudioChannels.CHANNEL_MONO
                 )
                 await client.async_disconnect()
