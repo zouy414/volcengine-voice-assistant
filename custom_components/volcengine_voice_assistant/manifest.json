@@ -10,5 +10,8 @@
     "integration_type": "service",
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/zouy414/volcengine-voice-assistant/issues",
+    "requirements": [
+        "aiohttp"
+    ],
     "version": "v0.0.0"
 }
