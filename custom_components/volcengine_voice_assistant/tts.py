@@ -97,8 +97,9 @@ class SubentryFlow(ConfigSubentryFlow):
             return self.async_show_form(
                 step_id="user", data_schema=self.USER_DATA_SCHEMA)
 
-        if not await self.__is_valid_user_input(user_input):
-            return self.async_abort(reason="Can not connect to server")
+        error = await self.__is_valid_user_input(user_input)
+        if error:
+            return self.async_abort(reason=error)
 
         return self.async_create_entry(
             title=user_input["name"], data=user_input, unique_id=gen_unique_id(user_input["name"]))
@@ -112,7 +113,7 @@ class SubentryFlow(ConfigSubentryFlow):
             return self.async_show_form(step_id="reconfigure", data_schema=self.add_suggested_values_to_schema(
                 self.RECONFIGURE_DATA_SCHEMA, suggested_values))
 
-        error: str = await self.__is_valid_user_input(user_input)
+        error = await self.__is_valid_user_input(user_input)
         if error:
             return self.async_abort(reason=error)
 
