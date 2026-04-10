@@ -20,6 +20,7 @@ from homeassistant.helpers.selector import (SelectSelector,
                                             SelectSelectorMode)
 
 from . import LOGGER, gen_unique_id
+from .config import VALID_LANGUAGES
 from .sdk.asr import Client
 from .sdk.utils import gen_wav_content
 
@@ -61,12 +62,7 @@ class SubentryFlow(ConfigSubentryFlow):
             ),
             voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration"): SelectSelector(
                 SelectSelectorConfig(
-                    options=[
-                        "volc.bigasr.sauc.duration",
-                        "volc.bigasr.sauc.concurrent",
-                        "volc.seedasr.sauc.duration",
-                        "volc.seedasr.sauc.concurrent"
-                    ],
+                    options=list(VALID_LANGUAGES.keys()),
                     mode=SelectSelectorMode.DROPDOWN
                 )
             ),
@@ -88,12 +84,7 @@ class SubentryFlow(ConfigSubentryFlow):
             ),
             voluptuous.Required("resource_id", default="volc.seedasr.sauc.duration"): SelectSelector(
                 SelectSelectorConfig(
-                    options=[
-                        "volc.bigasr.sauc.duration",
-                        "volc.bigasr.sauc.concurrent",
-                        "volc.seedasr.sauc.duration",
-                        "volc.seedasr.sauc.concurrent"
-                    ],
+                    options=list(VALID_LANGUAGES.keys()),
                     mode=SelectSelectorMode.DROPDOWN
                 )
             ),
@@ -175,8 +166,7 @@ class Provider(SpeechToTextEntity):
 
     @property
     def supported_languages(self) -> list[str]:
-        return ["zh-CN", "en-US", "ja-JP", "id-ID", "es-MX", "pt-BR", "de-DE", "fr-FR", "ko-KR", "fil-PH", "ms-MY", "th-TH",
-                "ar-SA", "it-IT", "bn-BD", "el-GR", "nl-NL", "ru-RU", "tr-TR", "vi-VN", "pl-PL", "ro-RO", "ne-NP", "uk-UA", "yue-CN"]
+        return VALID_LANGUAGES.get(self.__resource_id)
 
     @property
     def supported_formats(self) -> list[AudioFormats]:

@@ -4,6 +4,13 @@ from typing import Mapping
 
 from homeassistant.components.tts import Voice
 
+VALID_LANGUAGES: Mapping[str, list[str]] = {
+    "volc.bigasr.sauc.duration": ["zh-CN", "en-US", "ja-JP", "id-ID", "es-MX", "pt-BR", "de-DE", "fr-FR", "ko-KR", "fil-PH", "ms-MY", "th-TH", "ar-SA", "it-IT", "bn-BD", "el-GR", "nl-NL", "ru-RU", "tr-TR", "vi-VN", "pl-PL", "ro-RO", "ne-NP", "uk-UA", "yue-CN"],
+    "volc.bigasr.sauc.concurrent": ["zh-CN", "en-US", "ja-JP", "id-ID", "es-MX", "pt-BR", "de-DE", "fr-FR", "ko-KR", "fil-PH", "ms-MY", "th-TH", "ar-SA", "it-IT", "bn-BD", "el-GR", "nl-NL", "ru-RU", "tr-TR", "vi-VN", "pl-PL", "ro-RO", "ne-NP", "uk-UA", "yue-CN"],
+    "volc.seedasr.sauc.duration": ["zh-CN", "en-US", "ja-JP", "id-ID", "es-MX", "pt-BR", "de-DE", "fr-FR", "ko-KR", "fil-PH", "ms-MY", "th-TH", "ar-SA", "it-IT", "bn-BD", "el-GR", "nl-NL", "ru-RU", "tr-TR", "vi-VN", "pl-PL", "ro-RO", "ne-NP", "uk-UA", "yue-CN"],
+    "volc.seedasr.sauc.concurrent": ["zh-CN", "en-US", "ja-JP", "id-ID", "es-MX", "pt-BR", "de-DE", "fr-FR", "ko-KR", "fil-PH", "ms-MY", "th-TH", "ar-SA", "it-IT", "bn-BD", "el-GR", "nl-NL", "ru-RU", "tr-TR", "vi-VN", "pl-PL", "ro-RO", "ne-NP", "uk-UA", "yue-CN"]
+}
+
 DEFAULT_VOICES: Mapping[str, str] = {
     "seed-tts-2.0": "zh_female_vv_uranus_bigtts",
     "seed-tts-1.0": "zh_female_vv_mars_bigtts",
@@ -13,7 +20,7 @@ DEFAULT_VOICES: Mapping[str, str] = {
 # Valid voices config
 VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
     "seed-tts-2.0": {
-        "zh-CN": {
+        "zh-CN": [
             Voice(voice_id="zh_female_vv_uranus_bigtts", name="Vivi 2.0"),
             Voice(voice_id="zh_female_xiaohe_uranus_bigtts", name="小何 2.0"),
             Voice(voice_id="zh_male_m191_uranus_bigtts", name="云舟 2.0"),
@@ -74,28 +81,28 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(
                 voice_id="saturn_zh_female_reqingaina_cs_tob",
                 name="热情艾娜 2.0")
-        },
-        "en-US": {
+        ],
+        "en-US": [
             Voice(voice_id="en_male_tim_uranus_bigtts", name="Tim"),
             Voice(voice_id="en_female_dacey_uranus_bigtts", name="Dacey"),
             Voice(voice_id="en_female_stokie_uranus_bigtts", name="Stokie")
-        },
-        "en-GB": {
+        ],
+        "en-GB": [
             Voice(voice_id="zh_female_yingyujiaoxue_uranus_bigtts",
                   name="Tina老师 2.0")
-        },
-        "ja-JP": {
+        ],
+        "ja-JP": [
             Voice(voice_id="zh_female_vv_uranus_bigtts", name="Vivi 2.0")
-        },
-        "id-ID": {
+        ],
+        "id-ID": [
             Voice(voice_id="zh_female_vv_uranus_bigtts", name="Vivi 2.0")
-        },
-        "es-MX": {
+        ],
+        "es-MX": [
             Voice(voice_id="zh_female_vv_uranus_bigtts", name="Vivi 2.0")
-        }
+        ]
     },
     "seed-tts-1.0": {
-        "zh-CN": {
+        "zh-CN": [
             Voice(voice_id="zh_male_lengkugege_emo_v2_mars_bigtts",
                   name="冷酷哥哥（多情感）"),
             Voice(voice_id="zh_female_tianxinxiaomei_emo_v2_mars_bigtts",
@@ -450,8 +457,8 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_female_gufengshaoyu_mars_bigtts", name="古风少御"),
             Voice(voice_id="zh_female_wenroushunv_mars_bigtts", name="温柔淑女"),
             Voice(voice_id="zh_male_fanjuanqingnian_mars_bigtts", name="反卷青年")
-        },
-        "en-US": {
+        ],
+        "en-US": [
             Voice(
                 voice_id="en_female_candice_emo_v2_mars_bigtts",
                 name="Candice"),
@@ -521,8 +528,8 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
                 voice_id="zh_female_tiexinnvsheng_mars_bigtts",
                 name="贴心女声/Candy"),
             Voice(voice_id="zh_female_mengyatou_mars_bigtts", name="萌丫头/Cutey")
-        },
-        "en-GB": {
+        ],
+        "en-GB": [
             Voice(voice_id="zh_female_shuangkuaisisi_emo_v2_mars_bigtts",
                   name="爽快思思（多情感）"),
             Voice(voice_id="en_male_corey_emo_v2_mars_bigtts", name="Corey"),
@@ -541,8 +548,8 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="ICL_en_male_cc_alastor_tob", name="Alastor"),
             Voice(voice_id="en_male_smith_mars_bigtts", name="Smith"),
             Voice(voice_id="en_female_anna_mars_bigtts", name="Anna")
-        },
-        "ja-JP": {
+        ],
+        "ja-JP": [
             Voice(
                 voice_id="multi_zh_male_youyoujunzi_moon_bigtts",
                 name="ひかる（光）"),
@@ -562,8 +569,8 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
                   name="はるこ（晴子）/Esmeralda"),
             Voice(voice_id="multi_male_wanqudashu_moon_bigtts",
                   name="ひろし（広志）/Roberto")
-        },
-        "es-MX": {
+        ],
+        "es-MX": [
             Voice(
                 voice_id="multi_female_maomao_conversation_wvae_bigtts",
                 name="Diana"),
@@ -581,10 +588,10 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
                   name="はるこ（晴子）/Esmeralda"),
             Voice(voice_id="multi_male_wanqudashu_moon_bigtts",
                   name="ひろし（広志）/Roberto")
-        }
+        ]
     },
     "seed-tts-1.0-concurr": {
-        "zh-CN": {
+        "zh-CN": [
             Voice(voice_id="zh_male_lengkugege_emo_v2_mars_bigtts",
                   name="冷酷哥哥（多情感）"),
             Voice(voice_id="zh_female_tianxinxiaomei_emo_v2_mars_bigtts",
@@ -939,8 +946,8 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="zh_female_gufengshaoyu_mars_bigtts", name="古风少御"),
             Voice(voice_id="zh_female_wenroushunv_mars_bigtts", name="温柔淑女"),
             Voice(voice_id="zh_male_fanjuanqingnian_mars_bigtts", name="反卷青年")
-        },
-        "en-US": {
+        ],
+        "en-US": [
             Voice(
                 voice_id="en_female_candice_emo_v2_mars_bigtts",
                 name="Candice"),
@@ -1010,8 +1017,8 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
                 voice_id="zh_female_tiexinnvsheng_mars_bigtts",
                 name="贴心女声/Candy"),
             Voice(voice_id="zh_female_mengyatou_mars_bigtts", name="萌丫头/Cutey")
-        },
-        "en-GB": {
+        ],
+        "en-GB": [
             Voice(voice_id="zh_female_shuangkuaisisi_emo_v2_mars_bigtts",
                   name="爽快思思（多情感）"),
             Voice(voice_id="en_male_corey_emo_v2_mars_bigtts", name="Corey"),
@@ -1030,8 +1037,8 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="ICL_en_male_cc_alastor_tob", name="Alastor"),
             Voice(voice_id="en_male_smith_mars_bigtts", name="Smith"),
             Voice(voice_id="en_female_anna_mars_bigtts", name="Anna")
-        },
-        "ja-JP": {
+        ],
+        "ja-JP": [
             Voice(
                 voice_id="multi_zh_male_youyoujunzi_moon_bigtts",
                 name="ひかる（光）"),
@@ -1051,8 +1058,8 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
                   name="はるこ（晴子）/Esmeralda"),
             Voice(voice_id="multi_male_wanqudashu_moon_bigtts",
                   name="ひろし（広志）/Roberto")
-        },
-        "es-MX": {
+        ],
+        "es-MX": [
             Voice(
                 voice_id="multi_female_maomao_conversation_wvae_bigtts",
                 name="Diana"),
@@ -1070,6 +1077,6 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
                   name="はるこ（晴子）/Esmeralda"),
             Voice(voice_id="multi_male_wanqudashu_moon_bigtts",
                   name="ひろし（広志）/Roberto")
-        }
+        ]
     }
 }
