@@ -138,7 +138,7 @@ class SubentryFlow(ConfigSubentryFlow):
             del user_input["access_key"]
             self.__logger.exception(
                 "Invalid user input: %s, error: %s", user_input, e)
-            return e
+            return str(e)
 
 
 class Provider(SpeechToTextEntity):
