@@ -9,13 +9,13 @@ env:
   PACKAGE_NAME: volcengine_voice_assistant.zip
 
 jobs:
-  package:
+  pack:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v6
-      - name: Update version
+      - name: Update Version
         run: sed -i "s/v0.0.0/${{ github.ref_name }}/g" "${{ github.workspace }}/custom_components/${{ env.COMPONENT_NAME }}/manifest.json"
       - name: Compress
         run: |
