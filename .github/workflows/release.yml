@@ -22,6 +22,6 @@ jobs:
           cd "${{ github.workspace }}/custom_components/${{ env.COMPONENT_NAME }}"
           zip "${{ env.PACKAGE_NAME }}" -r ./
       - name: Publish
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: "${{ github.workspace }}/custom_components/${{ env.COMPONENT_NAME }}/${{ env.PACKAGE_NAME }}"
