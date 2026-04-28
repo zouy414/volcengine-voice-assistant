@@ -2,22 +2,14 @@
 
 set -e
 
-# Preprocess the content of the document retrieved from the API and print it to the console.
-doc_detail=$(
-    curl 'https://www.volcengine.com/api/doc/getDocDetail?LibraryID=6561&DocumentID=1257544&AuditDocumentID=&type=online' \
-        | jq .Result.Content >&1 \
-        | sed -E 's/\\n/\n/g' \
-        | sed -E 's/( |"|^.*\\\\$)//g' \
-        | sed -E '/^$/d' \
-        | grep -E "(^\||音色列表)"
-)
-
+# Iterate through each line of the preprocessed document content to extract the
+# valid voices for the TTS models and organize them in a structured format.
 valid_resources=()
 declare -A valid_languages
 declare -A valid_voices
 resuorce_id=""
 is_supported_section="false"
-for line in $doc_detail; do
+while IFS= read -r line; do
     # Recognize the section of the document that lists the supported voices for the TTS models.
     case "$line" in
         *"豆包语音合成模型2.0"*"音色列表"*)
@@ -44,51 +36,60 @@ for line in $doc_detail; do
     fi
 
     # Extract the voice information for the supported voices.
+    voice=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ", name=\"" $3 "\")"}')
     case "$line" in
         *"中文"*)
             if [[ "${valid_languages["$resuorce_id"]}" != *"zh-CN"* ]]; then
                 valid_languages["$resuorce_id"]+="zh-CN "
             fi
-            valid_voices["$resuorce_id:zh-CN"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            valid_voices["$resuorce_id:zh-CN"]+="$voice,\n"
             ;;
         *"英文"*|*"美式英语"*)
             if [[ "${valid_languages["$resuorce_id"]}" != *"en-US"* ]]; then
                 valid_languages["$resuorce_id"]+="en-US "
             fi
-            valid_voices["$resuorce_id:en-US"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            valid_voices["$resuorce_id:en-US"]+="$voice,\n"
             ;;
         *"英式英语"*)
             if [[ "${valid_languages["$resuorce_id"]}" != *"en-GB"* ]]; then
                 valid_languages["$resuorce_id"]+="en-GB "
             fi
-            valid_voices["$resuorce_id:en-GB"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            valid_voices["$resuorce_id:en-GB"]+="$voice,\n"
             ;;
         *"日语"*)
             if [[ "${valid_languages["$resuorce_id"]}" != *"ja-JP"* ]]; then
                 valid_languages["$resuorce_id"]+="ja-JP "
             fi
-            valid_voices["$resuorce_id:ja-JP"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            valid_voices["$resuorce_id:ja-JP"]+="$voice,\n"
             ;;
         *"西语"*)
             if [[ "${valid_languages["$resuorce_id"]}" != *"es-ES"* ]]; then
                 valid_languages["$resuorce_id"]+="es-ES "
             fi
-            valid_voices["$resuorce_id:es-ES"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            valid_voices["$resuorce_id:es-ES"]+="$voice,\n"
             ;;
         *"印尼"*)
             if [[ "${valid_languages["$resuorce_id"]}" != *"id-ID"* ]]; then
                 valid_languages["$resuorce_id"]+="id-ID "
             fi
-            valid_voices["$resuorce_id:id-ID"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            valid_voices["$resuorce_id:id-ID"]+="$voice,\n"
             ;;
         *"墨西哥西班牙语"*)
             if [[ "${valid_languages["$resuorce_id"]}" != *"es-MX"* ]]; then
                 valid_languages["$resuorce_id"]+="es-MX "
             fi
-            valid_voices["$resuorce_id:es-MX"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ", name=\"" $3 "\"),"}')"\n"
+            valid_voices["$resuorce_id:es-MX"]+="$voice,\n"
             ;;
     esac
-done
+done <<< "$(
+    # Preprocess the content of the document retrieved from the API and print it to the console.
+    curl 'https://www.volcengine.com/api/doc/getDocDetail?LibraryID=6561&DocumentID=1257544&AuditDocumentID=&type=online' \
+        | jq .Result.Content >&1 \
+        | sed -E 's/\\n/\n/g' \
+        | sed -E 's/( |"|^.*\\\\$)//g' \
+        | sed -E '/^$/d' \
+        | grep -E "(^\||音色列表)"
+)"
 
 echo 'VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {'
 for resource in "${valid_resources[@]}"; do
@@ -97,7 +98,7 @@ for resource in "${valid_resources[@]}"; do
 
     # Print the valid voices for each language in a structured format.
     for language in ${valid_languages["$resource"]}; do
-        echo "        \"$language\": ["
+        echo -n "        \"$language\": ["
         echo -e "${valid_voices["$resource:$language"]}" | sort | uniq
         echo "        ],"
     done
