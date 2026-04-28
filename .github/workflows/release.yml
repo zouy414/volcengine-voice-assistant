@@ -8,6 +8,9 @@ env:
   COMPONENT_NAME: volcengine_voice_assistant
   PACKAGE_NAME: volcengine_voice_assistant.zip
 
+permissions:
+  contents: write
+
 jobs:
   pack:
     runs-on: ubuntu-latest

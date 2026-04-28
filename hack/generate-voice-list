@@ -4,23 +4,20 @@ set -e
 
 # Iterate through each line of the preprocessed document content to extract the
 # valid voices for the TTS models and organize them in a structured format.
-valid_resources=()
 declare -A valid_languages
 declare -A valid_voices
-resuorce_id=""
+resource_id=""
 is_supported_section="false"
 while IFS= read -r line; do
     # Recognize the section of the document that lists the supported voices for the TTS models.
     case "$line" in
         *"豆包语音合成模型2.0"*"音色列表"*)
-            resuorce_id="seed-tts-2.0"
-            valid_resources+=("$resuorce_id")
+            resource_id="seed-tts-2.0"
             is_supported_section="true"
             continue
             ;;
         *"豆包语音合成模型1.0"*"音色列表"*)
-            resuorce_id="seed-tts-1.0"
-            valid_resources+=("$resuorce_id")
+            resource_id="seed-tts-1.0 seed-tts-1.0-concurr"
             is_supported_section="true"
             continue
             ;;
@@ -35,75 +32,48 @@ while IFS= read -r line; do
         continue
     fi
 
+    # Skip lines that do not contain the voice information in the expected format.
+    echo "$line" | grep -E -q '^| *|.+|.+|.+|' || continue
+    voice_id=$(echo "$line" | awk -F '|' '{print $4}')
+    voice_name=$(echo "$line" | awk -F '|' '{print $3}')
+    [[ -z "$voice_id" || -z "$voice_name" ]] && continue
+
     # Extract the voice information for the supported voices.
-    voice=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ", name=\"" $3 "\")"}')
-    case "$line" in
-        *"中文"*)
-            if [[ "${valid_languages["$resuorce_id"]}" != *"zh-CN"* ]]; then
-                valid_languages["$resuorce_id"]+="zh-CN "
-            fi
-            valid_voices["$resuorce_id:zh-CN"]+="$voice,\n"
-            ;;
-        *"英文"*|*"美式英语"*)
-            if [[ "${valid_languages["$resuorce_id"]}" != *"en-US"* ]]; then
-                valid_languages["$resuorce_id"]+="en-US "
-            fi
-            valid_voices["$resuorce_id:en-US"]+="$voice,\n"
-            ;;
-        *"英式英语"*)
-            if [[ "${valid_languages["$resuorce_id"]}" != *"en-GB"* ]]; then
-                valid_languages["$resuorce_id"]+="en-GB "
-            fi
-            valid_voices["$resuorce_id:en-GB"]+="$voice,\n"
-            ;;
-        *"日语"*|*"日文"*)
-            if [[ "${valid_languages["$resuorce_id"]}" != *"ja-JP"* ]]; then
-                valid_languages["$resuorce_id"]+="ja-JP "
-            fi
-            valid_voices["$resuorce_id:ja-JP"]+="$voice,\n"
-            ;;
-        *"西语"*)
-            if [[ "${valid_languages["$resuorce_id"]}" != *"es-ES"* ]]; then
-                valid_languages["$resuorce_id"]+="es-ES "
-            fi
-            valid_voices["$resuorce_id:es-ES"]+="$voice,\n"
-            ;;
-        *"印尼"*)
-            if [[ "${valid_languages["$resuorce_id"]}" != *"id-ID"* ]]; then
-                valid_languages["$resuorce_id"]+="id-ID "
-            fi
-            valid_voices["$resuorce_id:id-ID"]+="$voice,\n"
-            ;;
-        *"墨西哥西班牙语"*)
-            if [[ "${valid_languages["$resuorce_id"]}" != *"es-MX"* ]]; then
-                valid_languages["$resuorce_id"]+="es-MX "
-            fi
-            valid_voices["$resuorce_id:es-MX"]+="$voice,\n"
-            ;;
-    esac
+    voice="            Voice(voice_id=\"$voice_id\", name=\"$voice_name\")"
+    for item in "中文:zh-CN" "英文:en-US" "美式英语:en-US" "英式英语:en-GB" "日语:ja-JP" "日文:ja-JP" "西语:es-ES" "印尼:id-ID" "墨西哥西班牙语:es-MX"; do
+        keyword="${item%:*}"
+        language="${item#*:}"
+
+        [[ "$line" == *"${keyword%:*}"* ]] && {
+            [[ "${valid_languages["$resource_id"]}" != *"${language}"* ]] && valid_languages["$resource_id"]+="${language} "
+            valid_voices["$resource_id:${language}"]+="$voice,\n"
+        }
+    done
 done <<< "$(
     # Preprocess the content of the document retrieved from the API and print it to the console.
     curl 'https://www.volcengine.com/api/doc/getDocDetail?LibraryID=6561&DocumentID=1257544&AuditDocumentID=&type=online' \
-        | jq .Result.Content >&1 \
+        | jq .Result.Content \
+        | sed -E 's/\\\\/\\/g' \
         | sed -E 's/\\n/\n/g' \
-        | sed -E 's/( |"|^.*\\\\$)//g' \
-        | sed -E '/^$/d' \
-        | grep -E "(^\||音色列表)"
+        | sed -E 's/ //g' \
+        | sed -E 's/(：|、)/ /g'
 )"
 
 echo 'VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {'
-for resource in "${valid_resources[@]}"; do
-    # Print the valid voices for each TTS model in a structured format.
-    echo "    \"$resource\": {"
+for key in "${!valid_languages[@]}"; do
+    for resource in $key; do
+        # Print the valid voices for each TTS model in a structured format.
+        echo "    \"$resource\": {"
 
-    # Print the valid voices for each language in a structured format.
-    for language in ${valid_languages["$resource"]}; do
-        echo -n "        \"$language\": ["
-        echo -e "${valid_voices["$resource:$language"]}" | sort | uniq
-        echo "        ],"
+        # Print the valid voices for each language in a structured format.
+        for language in ${valid_languages["$key"]}; do
+            echo -n "        \"$language\": ["
+            echo -e "${valid_voices["$key:$language"]}" | sort | uniq
+            echo "        ],"
+        done
+
+        # Print the closing bracket for the current TTS model.
+        echo "    },"
     done
-
-    # Print the closing bracket for the current TTS model.
-    echo "    },"
 done
 echo "}"
