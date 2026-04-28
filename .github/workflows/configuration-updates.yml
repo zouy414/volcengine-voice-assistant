@@ -11,7 +11,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  generate-voice-list:
+  update-valid-voices:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -21,10 +21,10 @@ jobs:
           sudo apt-get install -y jq python3-autopep8
       - name: Update Configuration
         run: |
-          sed -i '/# VALID_VOICES_CONFIG_START/,/# VALID_VOICES_CONFIG_END/d' ./custom_components/volcengine_voice_assistant/config/__init__.py
-          echo "# VALID_VOICES_CONFIG_START" >> ./custom_components/volcengine_voice_assistant/config/__init__.py
-          ./hack/generate-voice-list >> ./custom_components/volcengine_voice_assistant/config/__init__.py
-          echo "# VALID_VOICES_CONFIG_END" >> ./custom_components/volcengine_voice_assistant/config/__init__.py
+          sed -i '/# VALID_VOICES_START/,/# VALID_VOICES_END/d' ./custom_components/volcengine_voice_assistant/config/__init__.py
+          echo "# VALID_VOICES_START" >> ./custom_components/volcengine_voice_assistant/config/__init__.py
+          ./hack/generate-valid-voices >> ./custom_components/volcengine_voice_assistant/config/__init__.py
+          echo "# VALID_VOICES_END" >> ./custom_components/volcengine_voice_assistant/config/__init__.py
       - name: Format Code
         run: |
           autopep8 --in-place --recursive ./custom_components/volcengine_voice_assistant/config/__init__.py

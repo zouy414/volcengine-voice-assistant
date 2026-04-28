@@ -17,7 +17,7 @@ DEFAULT_VOICES: Mapping[str, str] = {
     "seed-tts-1.0-concurr": "zh_female_vv_mars_bigtts"
 }
 
-# VALID_VOICES_CONFIG_START
+# VALID_VOICES_START
 VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
     "seed-tts-2.0": {
         "zh-CN": [
@@ -965,4 +965,4 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
         ],
     },
 }
-# VALID_VOICES_CONFIG_END
+# VALID_VOICES_END
