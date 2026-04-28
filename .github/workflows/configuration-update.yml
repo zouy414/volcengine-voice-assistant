@@ -1,4 +1,4 @@
-name: Update Configuration
+name: Configuration Update
 
 on:
   schedule:
