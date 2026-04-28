@@ -1,3 +1,108 @@
 #!/bin/bash
 
-cat tmp.yaml | grep "西语" | awk -F '|' '{print " Voice(voice_id=\"" $2 "\"" ",name=\"" $1 "\"),"}'
+set -e
+
+# Preprocess the content of the document retrieved from the API and print it to the console.
+doc_detail=$(
+    curl 'https://www.volcengine.com/api/doc/getDocDetail?LibraryID=6561&DocumentID=1257544&AuditDocumentID=&type=online' \
+        | jq .Result.Content >&1 \
+        | sed -E 's/\\n/\n/g' \
+        | sed -E 's/( |"|^.*\\\\$)//g' \
+        | sed -E '/^$/d' \
+        | grep -E "(^\||音色列表)"
+)
+
+valid_resources=()
+declare -A valid_languages
+declare -A valid_voices
+resuorce_id=""
+is_supported_section="false"
+for line in $doc_detail; do
+    # Recognize the section of the document that lists the supported voices for the TTS models.
+    case "$line" in
+        *"豆包语音合成模型2.0"*"音色列表"*)
+            resuorce_id="seed-tts-2.0"
+            valid_resources+=("$resuorce_id")
+            is_supported_section="true"
+            continue
+            ;;
+        *"豆包语音合成模型1.0"*"音色列表"*)
+            resuorce_id="seed-tts-1.0"
+            valid_resources+=("$resuorce_id")
+            is_supported_section="true"
+            continue
+            ;;
+        *"音色列表"*)
+            is_supported_section="false"
+            continue
+            ;;
+    esac
+
+    # Skip secitions that do not list the supported voices for the TTS models.
+    if [[ "$is_supported_section" == "false" ]]; then
+        continue
+    fi
+
+    # Extract the voice information for the supported voices.
+    case "$line" in
+        *"中文"*)
+            if [[ "${valid_languages["$resuorce_id"]}" != *"zh-CN"* ]]; then
+                valid_languages["$resuorce_id"]+="zh-CN "
+            fi
+            valid_voices["$resuorce_id:zh-CN"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            ;;
+        *"英文"*|*"美式英语"*)
+            if [[ "${valid_languages["$resuorce_id"]}" != *"en-US"* ]]; then
+                valid_languages["$resuorce_id"]+="en-US "
+            fi
+            valid_voices["$resuorce_id:en-US"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            ;;
+        *"英式英语"*)
+            if [[ "${valid_languages["$resuorce_id"]}" != *"en-GB"* ]]; then
+                valid_languages["$resuorce_id"]+="en-GB "
+            fi
+            valid_voices["$resuorce_id:en-GB"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            ;;
+        *"日语"*)
+            if [[ "${valid_languages["$resuorce_id"]}" != *"ja-JP"* ]]; then
+                valid_languages["$resuorce_id"]+="ja-JP "
+            fi
+            valid_voices["$resuorce_id:ja-JP"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            ;;
+        *"西语"*)
+            if [[ "${valid_languages["$resuorce_id"]}" != *"es-ES"* ]]; then
+                valid_languages["$resuorce_id"]+="es-ES "
+            fi
+            valid_voices["$resuorce_id:es-ES"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            ;;
+        *"印尼"*)
+            if [[ "${valid_languages["$resuorce_id"]}" != *"id-ID"* ]]; then
+                valid_languages["$resuorce_id"]+="id-ID "
+            fi
+            valid_voices["$resuorce_id:id-ID"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ",name=\"" $3 "\"),"}')"\n"
+            ;;
+        *"墨西哥西班牙语"*)
+            if [[ "${valid_languages["$resuorce_id"]}" != *"es-MX"* ]]; then
+                valid_languages["$resuorce_id"]+="es-MX "
+            fi
+            valid_voices["$resuorce_id:es-MX"]+=$(echo "$line" | awk -F '|' '{print "            Voice(voice_id=\"" $4 "\"" ", name=\"" $3 "\"),"}')"\n"
+            ;;
+    esac
+done
+
+echo 'VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {'
+for resource in "${valid_resources[@]}"; do
+    # Print the valid voices for each TTS model in a structured format.
+    echo "    \"$resource\": {"
+
+    # Print the valid voices for each language in a structured format.
+    for language in ${valid_languages["$resource"]}; do
+        echo "        \"$language\": ["
+        echo -e "${valid_voices["$resource:$language"]}" | sort | uniq
+        echo "        ],"
+    done
+
+    # Print the closing bracket for the current TTS model.
+    echo "    },"
+done
+echo "}"
