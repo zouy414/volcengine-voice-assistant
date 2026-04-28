@@ -1,0 +1,16 @@
+name: Update Configuration
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch: 
+
+jobs:
+  valid_voices:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Generate
+        run: ./tools/gen_voice_list
