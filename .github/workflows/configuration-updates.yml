@@ -15,10 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
       - name: Install Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq python3-autopep8
+          python -m pip install autopep8
       - name: Update Configuration
         run: |
           sed -i '/# VALID_VOICES_START/,/# VALID_VOICES_END/d' ./custom_components/volcengine_voice_assistant/config/__init__.py
@@ -27,7 +30,7 @@ jobs:
           echo "# VALID_VOICES_END" >> ./custom_components/volcengine_voice_assistant/config/__init__.py
       - name: Format Code
         run: |
-          autopep8 --in-place --recursive ./custom_components/volcengine_voice_assistant/config/__init__.py
+          python3 -m autopep8 --in-place --recursive ./custom_components/volcengine_voice_assistant/config/__init__.py
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
         with:
