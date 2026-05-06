@@ -32,7 +32,7 @@ async def async_setup_entry(_: HomeAssistant, config_entry: ConfigEntry,
                 continue
 
             provider = Provider(subentry.data["name"], subentry.data["url"], subentry.data["app_key"],
-                                subentry.data["access_key"], subentry.data["resource_id"])
+                                subentry.data["resource_id"], subentry.data.get("access_key"))
             async_add_entities(
                 [provider],
                 config_subentry_id=subentry.subentry_id
@@ -63,7 +63,7 @@ class SubentryFlow(ConfigSubentryFlow):
                 )
             ),
             voluptuous.Required("app_key"): str,
-            voluptuous.Required("access_key"): str,
+            voluptuous.Optional("access_key", default=""): str,
         }
     )
     RECONFIGURE_DATA_SCHEMA = voluptuous.Schema(
@@ -84,7 +84,7 @@ class SubentryFlow(ConfigSubentryFlow):
                 )
             ),
             voluptuous.Required("app_key"): str,
-            voluptuous.Required("access_key"): str,
+            voluptuous.Optional("access_key", default=""): str,
         }
     )
 
@@ -109,7 +109,6 @@ class SubentryFlow(ConfigSubentryFlow):
         """User flow to modify an existing location."""
         if user_input is None:
             suggested_values = dict(self._get_reconfigure_subentry().data)
-            del suggested_values['access_key']
             return self.async_show_form(step_id="reconfigure", data_schema=self.add_suggested_values_to_schema(
                 self.RECONFIGURE_DATA_SCHEMA, suggested_values))
 
@@ -122,12 +121,11 @@ class SubentryFlow(ConfigSubentryFlow):
 
     async def __is_valid_user_input(self, user_input: dict[str, Any]) -> str:
         try:
-            async with Client(user_input["url"], user_input["app_key"], user_input["access_key"], user_input["resource_id"]) as client:
+            async with Client(user_input["url"], user_input["app_key"], user_input["resource_id"], user_input.get("access_key")) as client:
                 await client.async_connect()
                 await client.async_disconnect()
             return None
         except Exception as e:
-            del user_input["access_key"]
             self.__logger.exception(
                 "Invalid user input: %s, error: %s", user_input, e)
             return str(e)
@@ -153,7 +151,7 @@ class Provider(TextToSpeechEntity):
     __disable_markdown_filter: bool = False
 
     def __init__(self, name: str, url: str, app_key: str,
-                 access_key: str, resource_id: str):
+                 resource_id: str, access_key: str | None = None):
         self._attr_name = name
         self._attr_unique_id = gen_unique_id(name)
         self._attr_default_options = {"voice": DEFAULT_VOICES.get(resource_id)}
@@ -183,7 +181,7 @@ class Provider(TextToSpeechEntity):
 
     async def __async_stream_tts_audio(
             self, request: TTSAudioRequest) -> AsyncGenerator[bytes]:
-        async with Client(self.__url, self.__app_key, self.__access_key, self.__resource_id) as client:
+        async with Client(self.__url, self.__app_key, self.__resource_id, self.__access_key) as client:
             resp = await client.async_connect()
             self.__logger.info("Connect successfully, response: %s", resp)
             try:

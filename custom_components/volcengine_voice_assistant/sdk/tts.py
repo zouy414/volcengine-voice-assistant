@@ -586,13 +586,17 @@ class Client:
     __disable_markdown_filter: bool
 
     def __init__(self, url: str, app_key: str,
-                 access_key: str, resource_id: str):
+                 resource_id: str, access_key: str | None = None):
         self.__url = url
         self.__auth_header = {
             "X-Api-App-Key": app_key,
             "X-Api-Access-Key": access_key,
             "X-Api-Resource-Id": resource_id,
             "X-Api-Request-Id": str(uuid.uuid4())
+        } if access_key else {
+            "X-Api-Key": app_key,
+            "X-Api-Resource-Id": resource_id,
+            "X-Api-Connect-Id": str(uuid.uuid4())
         }
 
     async def __aenter__(self) -> 'Client':

@@ -27,11 +27,11 @@ A third-party custom component for Home Assistant to integrate Volcengine STT/TT
 ### Setup SpeechToText Service
 
 1. Go to `Settings` -> `Devices & Services` -> `Volcengine Voice Assistant`.
-2. Click `Add SpeechToText Service` button and fill out required field.
+2. Click `Add SpeechToText Service` button and fill out required field(For new console `Access Key` is not required).
 3. Click `Submit` button
 
 ### Setup TextToSpeech Service
 
 1. Go to `Settings` -> `Devices & Services` -> `Volcengine Voice Assistant`.
-2. Click `Add TextToSpeech Service` button and fill out required field.
+2. Click `Add TextToSpeech Service` button and fill out required field(For new console `Access Key` is not required).
 3. Click `Submit` button
