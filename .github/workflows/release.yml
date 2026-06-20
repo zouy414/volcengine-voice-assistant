@@ -17,7 +17,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Update Version
         run: sed -i "s/v0.0.0/${{ github.ref_name }}/g" "${{ github.workspace }}/custom_components/${{ env.COMPONENT_NAME }}/manifest.json"
       - name: Compress
