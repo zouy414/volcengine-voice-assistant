@@ -80,6 +80,7 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="ICL_uranus_zh_female_xingganmeihuo_tob", name="性感魅惑2.0"),
             Voice(voice_id="ICL_uranus_zh_female_xingganyujie_tob", name="性感御姐2.0"),
             Voice(voice_id="ICL_uranus_zh_female_xiuliqianqian_tob", name="秀丽倩倩2.0"),
+            Voice(voice_id="ICL_uranus_zh_female_yingxiaokefu_v2_tob", name="营销小楠2.0"),
             Voice(voice_id="ICL_uranus_zh_female_yuanqitianmei_tob", name="元气甜妹2.0"),
             Voice(voice_id="ICL_uranus_zh_female_zhixingwenwan_tob", name="知性温婉2.0"),
             Voice(voice_id="ICL_uranus_zh_female_zhixinjiejie_tob", name="知心姐姐2.0"),
