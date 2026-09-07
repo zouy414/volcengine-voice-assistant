@@ -7,7 +7,6 @@ It provides a simple interface for sending audio data and receiving transcriptio
 import asyncio
 import json
 import struct
-import uuid
 from enum import IntEnum
 from typing import Any, AsyncGenerator, Dict, Generator, List
 
@@ -307,17 +306,17 @@ class Client:
     __seq: int = 1
 
     def __init__(self, url: str, app_key: str,
-                 resource_id: str, access_key: str = None):
+                 resource_id: str, connect_id: str, access_key: str | None = None):
         self.__url = url
         self.__auth_header = {
             "X-Api-App-Key": app_key,
             "X-Api-Access-Key": access_key,
             "X-Api-Resource-Id": resource_id,
-            "X-Api-Connect-Id": str(uuid.uuid4())
+            "X-Api-Connect-Id": connect_id
         } if access_key else {
             "X-Api-Key": app_key,
             "X-Api-Resource-Id": resource_id,
-            "X-Api-Connect-Id": str(uuid.uuid4())
+            "X-Api-Connect-Id": connect_id
         }
 
     async def __aenter__(self) -> 'Client':

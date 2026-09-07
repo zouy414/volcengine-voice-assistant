@@ -43,9 +43,9 @@ Options
     -c <container_id>
         specify the container to install components to
     [-u <uid>]
-        specify the user ID for the installed components
+        specify the user ID for the installed components, default is $CUID
     [-g <gid>]
-        specify the group ID for the installed components
+        specify the group ID for the installed components, default is $CGID
     [-h]
         print this help message and exit"
 }

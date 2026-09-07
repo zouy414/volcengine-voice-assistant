@@ -1,6 +1,7 @@
 """Support for Volcengine TTS service."""
 
 import asyncio
+import uuid
 from logging import Logger
 from typing import Any, AsyncGenerator, Mapping
 
@@ -181,15 +182,23 @@ class Provider(TextToSpeechEntity):
 
     async def __async_stream_tts_audio(
             self, request: TTSAudioRequest) -> AsyncGenerator[bytes]:
-        async with Client(self.__url, self.__app_key, self.__resource_id, self.__access_key) as client:
+        connect_id = str(uuid.uuid4())
+
+        self.__logger.info("Start speech to text", extra={
+                           "connect_id": connect_id})
+
+        async with Client(self.__url, self.__app_key, self.__resource_id, connect_id, self.__access_key) as client:
             resp = await client.async_connect()
-            self.__logger.info("Connect successfully, response: %s", resp)
+            self.__logger.info("Connect successfully, response: %s", resp, extra={
+                               "connect_id": connect_id})
             try:
                 (session_id, resp) = await client.async_start_session(
                     self._attr_name, request.options.get("voice"),
                     self.__encoding, self.__sample_rate, self.__enable_timestamp, self.__disable_markdown_filter)
                 self.__logger.info(
-                    "Start session successfully, session_id: %s, response: %s", session_id, resp)
+                    "Start session successfully, session_id: %s, response: %s", session_id, resp, extra={
+                        "connect_id": connect_id
+                    })
                 logger = self.__logger.getChild(session_id)
 
                 async def sender():
@@ -197,7 +206,9 @@ class Provider(TextToSpeechEntity):
                         async for text in request.message_gen:
                             await client.async_send_task(text)
                     except Exception as e:
-                        logger.exception("Send text failed: %s", e)
+                        logger.exception("Send text failed: %s", e, extra={
+                            "connect_id": connect_id
+                        })
                         raise
                     finally:
                         await client.async_finish_session()
@@ -210,13 +221,19 @@ class Provider(TextToSpeechEntity):
                     async for resp in client.async_recv():
                         yield resp.payload
 
-                    logger.info("Text to speech completed")
+                    logger.info("Text to speech completed", extra={
+                        "connect_id": connect_id
+                    })
                 except Exception as e:
-                    logger.exception("Failed to process request: %s", e)
+                    logger.exception("Failed to process request: %s", e, extra={
+                        "connect_id": connect_id
+                    })
                     if sender_task.cancel():
                         await sender_task
                     raise
             except Exception as e:
-                self.__logger.exception("Text to speech failed: %s", e)
+                self.__logger.exception("Text to speech failed: %s", e, extra={
+                    "connect_id": connect_id
+                })
             finally:
                 await client.async_disconnect()

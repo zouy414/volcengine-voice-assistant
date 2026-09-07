@@ -1,6 +1,7 @@
 """Support for Volcengine STT service."""
 
 import asyncio
+import uuid
 from logging import Logger
 
 import voluptuous
@@ -188,14 +189,19 @@ class Provider(SpeechToTextEntity):
 
     async def async_process_audio_stream(
             self, metadata: SpeechMetadata, stream: AsyncIterable[bytes]) -> SpeechResult:
-        self.__logger.info(f"Start speech to text, metadata: {metadata}")
-        async with Client(self.__url, self.__app_key, self.__resource_id, self.__access_key) as client:
+        connect_id = str(uuid.uuid4())
+
+        self.__logger.info("Start speech to text",
+                           extra={"metadata": metadata, "connect_id": connect_id})
+
+        async with Client(self.__url, self.__app_key, self.__resource_id, connect_id, self.__access_key) as client:
             # Connect to the server with the specified audio parameters
             resp = await client.async_connect(
                 self._attr_name, metadata.language,
                 audio_format=metadata.format, audio_codec=metadata.codec, audio_rate=metadata.sample_rate, audio_bits=metadata.bit_rate, audio_channels=metadata.channel
             )
-            self.__logger.info("Connect successfully, response: %s", resp)
+            self.__logger.info("Connect successfully, response: %s", resp, extra={
+                               "connect_id": connect_id})
 
             try:
                 # Start a separate task to send audio segments to the server
@@ -210,7 +216,8 @@ class Provider(SpeechToTextEntity):
                         async for segment in stream:
                             await client.async_send_segment(segment)
                     except Exception as e:
-                        self.__logger.exception("Send segment failed: %s", e)
+                        self.__logger.exception("Send segment failed: %s", e, extra={
+                                                "connect_id": connect_id})
                         raise
                     finally:
                         await client.async_disconnect()
@@ -222,19 +229,22 @@ class Provider(SpeechToTextEntity):
                 try:
                     async for response in client.async_recv():
                         if not response.payload_msg:
-                            self.__logger.debug(
-                                "Recv not payload msg response: %s", response)
+                            self.__logger.debug("Recv not payload msg response: %s", response, extra={
+                                                "connect_id": connect_id})
                             continue
                         result = response.payload_msg.get("result").get("text")
 
                     await sender_task
 
-                    self.__logger.info("Speech to text completed")
+                    self.__logger.info("Speech to text completed", extra={
+                                       "result": result, "connect_id": connect_id})
                     return SpeechResult(result, SpeechResultState.SUCCESS)
                 except Exception as e:
-                    self.__logger.exception("Failed to process stream: %s", e)
+                    self.__logger.exception("Failed to process stream: %s", e, extra={
+                                            "connect_id": connect_id})
                     if sender_task.cancel():
                         await sender_task
                     return SpeechResult(e, SpeechResultState.ERROR)
             except Exception as e:
-                self.__logger.exception("Speech to text failed: %s", e)
+                self.__logger.exception("Speech to text failed: %s", e, extra={
+                                        "connect_id": connect_id})
