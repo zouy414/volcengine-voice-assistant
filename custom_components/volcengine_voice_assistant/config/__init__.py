@@ -342,11 +342,6 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
         "es-MX": [
             Voice(voice_id="zh_female_vv_uranus_bigtts", name="Vivi2.0"),
         ],
-        "en-GB": [
-            Voice(voice_id="ICL_uranus_en_male_alastor_tob", name="Alastor2.0"),
-            Voice(voice_id="zh_female_yingyujiaoxue_uranus_bigtts",
-                  name="Tina老师2.0"),
-        ],
         "en-US": [
             Voice(voice_id="ICL_uranus_en_female_charlie_tob", name="Charlie2.0"),
             Voice(voice_id="ICL_uranus_en_male_big_boogie_tob",
@@ -367,8 +362,6 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="ICL_uranus_en_male_xavier_tob", name="Xavier2.0"),
             Voice(voice_id="ICL_uranus_en_male_zayne_tob", name="Zayne2.0"),
             Voice(voice_id="en_female_allison_uranus_bigtts", name="Allison"),
-            Voice(voice_id="en_female_authoritative-british_uranus_bigtts",
-                  name="Charlotte"),
             Voice(
                 voice_id="en_female_authoritative-informative_uranus_bigtts", name="Margaret"),
             Voice(voice_id="en_female_brittney_pimintel_uranus_bigtts", name="Zoe"),
@@ -411,7 +404,6 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="en_male_diyuwenrounan_uranus_bigtts", name="Julian"),
             Voice(voice_id="en_male_evil-guy-oxley_uranus_bigtts", name="Harrison"),
             Voice(voice_id="en_male_excited-male-voice_uranus_bigtts", name="Jasper"),
-            Voice(voice_id="en_male_father-christmas_uranus_bigtts", name="Alfred"),
             Voice(voice_id="en_male_fernando-martinez_uranus_bigtts", name="Felix"),
             Voice(voice_id="en_male_godfather_uranus_bigtts", name="Godfather"),
             Voice(voice_id="en_male_gollum_uranus_bigtts", name="Gollum"),
@@ -423,7 +415,6 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="en_male_josh_coery_uranus_bigtts", name="Josiah"),
             Voice(voice_id="en_male_josh_uranus_bigtts", name="Josh"),
             Voice(voice_id="en_male_kevin_uranus_bigtts", name="Kevin"),
-            Voice(voice_id="en_male_knightley_uranus_bigtts", name="Knightley"),
             Voice(voice_id="en_male_marcus_uranus_bigtts", name="Marcus"),
             Voice(voice_id="en_male_michael-mouse_uranus_bigtts", name="Chip"),
             Voice(voice_id="en_male_michael_kevin_uranus_bigtts",
@@ -431,13 +422,20 @@ VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {
             Voice(voice_id="en_male_michael_uranus_bigtts", name="Hank"),
             Voice(voice_id="en_male_motivational-coach_uranus_bigtts", name="Rory"),
             Voice(voice_id="en_male_ronald_uranus_bigtts", name="Ronald"),
-            Voice(voice_id="en_male_russell_uranus_bigtts", name="Russell"),
             Voice(voice_id="en_male_simba_p1_uranus_bigtts", name="Simba"),
             Voice(voice_id="en_male_tim_uranus_bigtts", name="Tim"),
             Voice(voice_id="en_male_tom_hiddleston_p1_uranus_bigtts", name="Tom"),
             Voice(voice_id="en_male_valentino_corey_uranus_bigtts", name="Clark"),
             Voice(voice_id="en_male_valentino_uranus_bigtts", name="Valentino"),
             Voice(voice_id="en_male_yangguangjieshuonan_uranus_bigtts", name="Dylan"),
+        ],
+        "en-GB": [
+            Voice(voice_id="ICL_uranus_en_male_alastor_tob", name="Alastor2.0"),
+            Voice(voice_id="en_female_authoritative-british_uranus_bigtts",
+                  name="Charlotte"),
+            Voice(voice_id="en_male_father-christmas_uranus_bigtts", name="Alfred"),
+            Voice(voice_id="en_male_knightley_uranus_bigtts", name="Knightley"),
+            Voice(voice_id="en_male_russell_uranus_bigtts", name="Russell"),
         ],
         "es-ES": [
             Voice(voice_id="mx_female_bv065_uranus_bigtts", name="Irene"),
