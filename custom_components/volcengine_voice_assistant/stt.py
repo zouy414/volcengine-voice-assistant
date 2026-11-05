@@ -2,14 +2,14 @@
 
 import asyncio
 import uuid
+from collections.abc import AsyncIterable
 from logging import Logger
 
 import voluptuous
-from homeassistant.components.stt import (AsyncIterable, AudioBitRates,
-                                          AudioChannels, AudioCodecs,
-                                          AudioFormats, AudioSampleRates,
-                                          SpeechMetadata, SpeechResult,
-                                          SpeechResultState,
+from homeassistant.components.stt import (AudioBitRates, AudioChannels,
+                                          AudioCodecs, AudioFormats,
+                                          AudioSampleRates, SpeechMetadata,
+                                          SpeechResult, SpeechResultState,
                                           SpeechToTextEntity)
 from homeassistant.config_entries import (ConfigEntry, ConfigSubentryFlow,
                                           SubentryFlowResult)
