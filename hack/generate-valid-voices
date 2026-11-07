@@ -51,8 +51,7 @@ while IFS= read -r line; do
     done
 done <<< "$(
     # Preprocess the content of the document retrieved from the API and print it to the console.
-    curl 'https://www.volcengine.com/api/doc/getDocDetail?LibraryID=6561&DocumentID=1257544&AuditDocumentID=&type=online' \
-        | jq .Result.Content \
+    curl 'https://docs.volcengine.com/docs/zh/doubao-voice/tone-list-3.md' \
         | sed -E 's/\\\\/\\/g' \
         | sed -E 's/\\n/\n/g' \
         | sed -E 's/ //g' \
