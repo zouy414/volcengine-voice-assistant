@@ -34,29 +34,24 @@ while IFS= read -r line; do
 
     # Skip lines that do not contain the voice information in the expected format.
     echo "$line" | grep -E -q '^| *|.+|.+|.+|' || continue
-    voice_id=$(echo "$line" | awk -F '|' '{print $4}')
-    voice_name=$(echo "$line" | awk -F '|' '{print $3}')
+    voice_id=$(echo "$line" | awk -F '|' '{print $4}' | xargs)
+    voice_name=$(echo "$line" | awk -F '|' '{print $3}' | xargs)
     [[ -z "$voice_id" || -z "$voice_name" ]] && continue
 
     # Extract the voice information for the supported voices.
-    voice="            Voice(voice_id=\"$voice_id\", name=\"$voice_name\")"
     for item in "中文:zh-CN" "英文:en-US" "美式英语:en-US" "英式英语:en-GB" "日语:ja-JP" "日文:ja-JP" "西语:es-ES" "印尼:id-ID" "墨西哥西班牙语:es-MX"; do
         keyword="${item%:*}"
         language="${item#*:}"
 
         [[ "$line" == *"${keyword%:*}"* ]] && {
+            # Append the language to the list of valid languages for the current TTS model if it is not already present.
             [[ "${valid_languages["$resource_id"]}" != *"${language}"* ]] && valid_languages["$resource_id"]+="${language} "
-            valid_voices["$resource_id:${language}"]+="$voice,\n"
+
+            # Append the voice information to the list of valid voices for the current TTS model and language.
+            valid_voices["$resource_id:${language}"]+="            Voice(voice_id=\"$voice_id\", name=\"$voice_name\"),\n"
         }
     done
-done <<< "$(
-    # Preprocess the content of the document retrieved from the API and print it to the console.
-    curl 'https://docs.volcengine.com/docs/zh/doubao-voice/tone-list-3.md' \
-        | sed -E 's/\\\\/\\/g' \
-        | sed -E 's/\\n/\n/g' \
-        | sed -E 's/ //g' \
-        | sed -E 's/(：|、)/ /g'
-)"
+done <<< "$(curl 'https://docs.volcengine.com/docs/zh/doubao-voice/tone-list-3.md')"
 
 echo 'VALID_VOICES: Mapping[str, Mapping[str, list[Voice]]] = {'
 for key in "${!valid_languages[@]}"; do
@@ -66,8 +61,8 @@ for key in "${!valid_languages[@]}"; do
 
         # Print the valid voices for each language in a structured format.
         for language in ${valid_languages["$key"]}; do
-            echo -n "        \"$language\": ["
-            echo -e "${valid_voices["$key:$language"]}" | sort | uniq
+            echo "        \"$language\": ["
+            echo -e "${valid_voices["$key:$language"]}" | sed '/^$/d' | sort | uniq
             echo "        ],"
         done
 
